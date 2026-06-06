@@ -18,7 +18,11 @@ export async function savePrediction(
   userId: string,
   match: Match,
   score: Score,
+  frozen = false,
 ): Promise<void> {
+  if (frozen) {
+    throw new PredictionError("Los pronósticos están congelados por el admin.");
+  }
   if (!canPredict(match)) {
     throw new PredictionError(
       "El pronóstico ya no se puede editar: el partido está cerrado.",

@@ -14,6 +14,8 @@ import { clampScore } from "@/lib/score-utils";
 import { useNow } from "@/lib/use-now";
 import { fireConfetti } from "@/lib/confetti";
 import { useAuth } from "@/features/auth/AuthProvider";
+import { useData } from "@/features/data/DataProvider";
+import { predictionsFrozen } from "@/lib/tournament";
 import { savePrediction, canPredict } from "@/services/predictions.service";
 import type { Match, Prediction } from "@/types";
 
@@ -57,9 +59,11 @@ function PredictionLine({ pred }: { pred?: Prediction }) {
 
 export function MatchCard({ match, myPrediction }: MatchCardProps) {
   const { uid } = useAuth();
+  const { tournament } = useData();
   const now = useNow();
   const stage = STAGES[match.stage];
-  const open = canPredict(match, now);
+  const frozen = predictionsFrozen(tournament);
+  const open = canPredict(match, now) && !frozen;
 
   const [home, setHome] = useState(myPrediction?.home ?? 0);
   const [away, setAway] = useState(myPrediction?.away ?? 0);
@@ -84,7 +88,7 @@ export function MatchCard({ match, myPrediction }: MatchCardProps) {
     setBusy(true);
     setError(null);
     try {
-      await savePrediction(uid, match, { home, away });
+      await savePrediction(uid, match, { home, away }, frozen);
       setSaved(true);
       fireConfetti();
       setTimeout(() => setSaved(false), 2500);
@@ -187,12 +191,19 @@ export function MatchCard({ match, myPrediction }: MatchCardProps) {
         </div>
       )}
 
-      {/* ---- Estado: upcoming pero ya cerró el pronóstico ---- */}
+      {/* ---- Estado: upcoming pero no editable (congelado o cerrado) ---- */}
       {match.status === "upcoming" && !open && (
         <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
           <TeamRow code={match.home} />
           <TeamRow code={match.away} />
-          <PredictionLine pred={myPrediction} />
+          {frozen && canPredict(match, now) ? (
+            <div style={{ marginTop: 6, display: "flex", alignItems: "center", justifyContent: "space-between", gap: 8 }}>
+              <Pill tone="dim">🔒 Congelados</Pill>
+              <PredictionLine pred={myPrediction} />
+            </div>
+          ) : (
+            <PredictionLine pred={myPrediction} />
+          )}
         </div>
       )}
 

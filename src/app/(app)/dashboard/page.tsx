@@ -11,17 +11,21 @@ import { useAuth } from "@/features/auth/AuthProvider";
 import { useData } from "@/features/data/DataProvider";
 import { teamName } from "@/constants/teams";
 import { canPredict } from "@/services/predictions.service";
+import { predictionsFrozen } from "@/lib/tournament";
 
 export default function DashboardPage() {
   const { profile } = useAuth();
-  const { matches, myPredictions, standings, myPosition, loading } = useData();
+  const { matches, myPredictions, standings, myPosition, tournament, loading } = useData();
 
   const me = standings.find((s) => s.me);
   const ranked = standings.some((s) => s.played > 0);
+  const frozen = predictionsFrozen(tournament);
   const pending = useMemo(
     () =>
-      matches.filter((m) => canPredict(m) && !myPredictions.has(m.id)).length,
-    [matches, myPredictions],
+      frozen
+        ? 0
+        : matches.filter((m) => canPredict(m) && !myPredictions.has(m.id)).length,
+    [matches, myPredictions, frozen],
   );
   const upcoming = useMemo(
     () => matches.filter((m) => m.status === "upcoming" || m.status === "live").slice(0, 4),
