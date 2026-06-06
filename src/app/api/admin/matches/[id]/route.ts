@@ -1,6 +1,10 @@
 import { NextResponse } from "next/server";
 import { requireAdmin } from "@/lib/auth/session";
-import { updateMatch, writeAuditLog } from "@/repositories/admin.server";
+import {
+  deleteMatchWithPredictions,
+  updateMatch,
+  writeAuditLog,
+} from "@/repositories/admin.server";
 import { matchPatchSchema } from "@/features/admin/schemas";
 
 export async function PATCH(
@@ -28,4 +32,23 @@ export async function PATCH(
     metadata: parsed.data,
   });
   return NextResponse.json({ ok: true });
+}
+
+export async function DELETE(
+  _request: Request,
+  { params }: { params: Promise<{ id: string }> },
+) {
+  const admin = await requireAdmin();
+  if (!admin) return NextResponse.json({ error: "No autorizado" }, { status: 403 });
+
+  const { id } = await params;
+  const res = await deleteMatchWithPredictions(id);
+  await writeAuditLog({
+    action: "delete_match",
+    entityType: "match",
+    entityId: id,
+    performedBy: admin.uid,
+    metadata: res,
+  });
+  return NextResponse.json({ ok: true, ...res });
 }

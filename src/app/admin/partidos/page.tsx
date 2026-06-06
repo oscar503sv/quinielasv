@@ -7,7 +7,7 @@ import { Pill } from "@/components/ui/Pill";
 import { Flag } from "@/components/ui/Flag";
 import { MatchForm } from "@/features/admin/MatchForm";
 import { useData } from "@/features/data/DataProvider";
-import { createMatch, updateMatch } from "@/features/admin/admin-client";
+import { createMatch, updateMatch, deleteMatch } from "@/features/admin/admin-client";
 import { teamName } from "@/constants/teams";
 import { STAGES } from "@/constants/stages";
 import type { MatchInput } from "@/repositories/admin.server";
@@ -26,6 +26,23 @@ export default function AdminPartidosPage() {
   const { matches, loading } = useData();
   const [editing, setEditing] = useState<Editing>(null);
   const [busy, setBusy] = useState(false);
+  const [deletingId, setDeletingId] = useState<string | null>(null);
+
+  async function handleDelete(m: Match) {
+    const ok = window.confirm(
+      `¿Eliminar ${teamName(m.home)} vs ${teamName(m.away)}?\n\nSe borrarán también todos los pronósticos de ese partido. Esta acción no se puede deshacer.`,
+    );
+    if (!ok) return;
+    setDeletingId(m.id);
+    try {
+      await deleteMatch(m.id);
+      if (editing?.mode === "edit" && editing.match.id === m.id) setEditing(null);
+    } catch (e) {
+      alert(e instanceof Error ? e.message : "Error al eliminar");
+    } finally {
+      setDeletingId(null);
+    }
+  }
 
   async function handleSubmit(values: MatchInput) {
     setBusy(true);
@@ -108,9 +125,19 @@ export default function AdminPartidosPage() {
                       <Pill tone={sp.tone}>{sp.label}</Pill>
                     </td>
                     <td style={{ padding: "11px 14px", textAlign: "right" }}>
-                      <Button variant="outline" onClick={() => setEditing({ mode: "edit", match: m })}>
-                        Editar
-                      </Button>
+                      <span style={{ display: "inline-flex", gap: 8, justifyContent: "flex-end" }}>
+                        <Button variant="outline" onClick={() => setEditing({ mode: "edit", match: m })}>
+                          Editar
+                        </Button>
+                        <Button
+                          variant="ghost"
+                          disabled={deletingId === m.id}
+                          onClick={() => handleDelete(m)}
+                          style={{ color: "var(--bad)" }}
+                        >
+                          {deletingId === m.id ? "Eliminando…" : "🗑"}
+                        </Button>
+                      </span>
                     </td>
                   </tr>
                 );

@@ -41,6 +41,24 @@ export async function updateMatch(
   await getAdminDb().collection("matches").doc(id).update(patch);
 }
 
+/** Borra el partido y todos los pronósticos asociados (evita huérfanos). */
+export async function deleteMatchWithPredictions(
+  id: string,
+): Promise<{ predictionsDeleted: number }> {
+  const db = getAdminDb();
+  const preds = await db
+    .collection("predictions")
+    .where("matchId", "==", id)
+    .get();
+
+  const batch = db.batch();
+  preds.docs.forEach((d) => batch.delete(d.ref));
+  batch.delete(db.collection("matches").doc(id));
+  await batch.commit();
+
+  return { predictionsDeleted: preds.size };
+}
+
 export async function getMatchById(id: string): Promise<Match | null> {
   const snap = await getAdminDb().collection("matches").doc(id).get();
   return snap.exists ? matchFromDoc(snap.id, snap.data()!) : null;

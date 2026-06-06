@@ -26,6 +26,15 @@ export function updateMatch(id: string, patch: Partial<MatchInput>) {
   return send<{ ok: true }>(`/api/admin/matches/${id}`, "PATCH", patch);
 }
 
+export async function deleteMatch(id: string) {
+  const res = await fetch(`/api/admin/matches/${id}`, { method: "DELETE" });
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) {
+    throw new Error((data as { error?: string }).error ?? "Error del servidor");
+  }
+  return data as { ok: true; predictionsDeleted: number };
+}
+
 export function finalizeMatch(matchId: string, result: Score) {
   return send<{ ok: true; predictionsScored: number }>(
     "/api/admin/finalize-match",
