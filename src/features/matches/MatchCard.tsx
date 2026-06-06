@@ -37,6 +37,23 @@ function TeamRow({ code, score }: { code: string; score?: number }) {
   );
 }
 
+function PredictionLine({ pred }: { pred?: Prediction }) {
+  return (
+    <div style={{ marginTop: 6, fontSize: "0.84rem" }}>
+      {pred ? (
+        <span style={{ color: "var(--text-dim)" }}>
+          Tu pronóstico:{" "}
+          <strong style={{ color: "var(--gold)" }}>
+            {pred.home}–{pred.away}
+          </strong>
+        </span>
+      ) : (
+        <span style={{ color: "var(--text-faint)" }}>No pronosticaste</span>
+      )}
+    </div>
+  );
+}
+
 export function MatchCard({ match, myPrediction }: MatchCardProps) {
   const { uid } = useAuth();
   const stage = STAGES[match.stage];
@@ -173,29 +190,7 @@ export function MatchCard({ match, myPrediction }: MatchCardProps) {
         <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
           <TeamRow code={match.home} />
           <TeamRow code={match.away} />
-          <div
-            style={{
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "space-between",
-              gap: 8,
-              marginTop: 6,
-            }}
-          >
-            <Pill tone="dim">⏳ Cerrado</Pill>
-            {myPrediction ? (
-              <span style={{ fontSize: "0.84rem", color: "var(--text-dim)" }}>
-                Tu pronóstico:{" "}
-                <strong style={{ color: "var(--gold)" }}>
-                  {myPrediction.home}–{myPrediction.away}
-                </strong>
-              </span>
-            ) : (
-              <span style={{ fontSize: "0.84rem", color: "var(--text-faint)" }}>
-                No pronosticaste
-              </span>
-            )}
-          </div>
+          <PredictionLine pred={myPrediction} />
         </div>
       )}
 
@@ -204,29 +199,7 @@ export function MatchCard({ match, myPrediction }: MatchCardProps) {
         <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
           <TeamRow code={match.home} />
           <TeamRow code={match.away} />
-          <div
-            style={{
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "space-between",
-              gap: 8,
-              marginTop: 6,
-            }}
-          >
-            <Pill tone="bad" live>En juego</Pill>
-            {myPrediction ? (
-              <span style={{ fontSize: "0.84rem", color: "var(--text-dim)" }}>
-                Tu pronóstico:{" "}
-                <strong style={{ color: "var(--gold)" }}>
-                  {myPrediction.home}–{myPrediction.away}
-                </strong>
-              </span>
-            ) : (
-              <span style={{ fontSize: "0.84rem", color: "var(--text-faint)" }}>
-                No pronosticaste
-              </span>
-            )}
-          </div>
+          <PredictionLine pred={myPrediction} />
         </div>
       )}
 
