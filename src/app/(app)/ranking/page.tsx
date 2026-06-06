@@ -8,33 +8,67 @@ import { Pill } from "@/components/ui/Pill";
 import { useData } from "@/features/data/DataProvider";
 import type { Standing } from "@/types";
 
-const MEDALS = ["🥇", "🥈", "🥉"];
-const PODIUM_ORDER = [1, 0, 2]; // visual 2-1-3
-const PODIUM_HEIGHT = [96, 130, 76];
+const PODIUM_ORDER = [1, 0, 2]; // columnas visuales: 2.º · 1.º · 3.º
+const PODIUM_THEME = [
+  { height: 132, medal: "🥇", accent: "var(--gold)", border: "var(--gold-border)",
+    grad: "linear-gradient(180deg, rgba(245,197,66,.18), rgba(245,197,66,.03))" },
+  { height: 104, medal: "🥈", accent: "#c8cfdb", border: "rgba(200,207,219,.4)",
+    grad: "linear-gradient(180deg, rgba(200,207,219,.16), rgba(200,207,219,.03))" },
+  { height: 80,  medal: "🥉", accent: "#cd8e5e", border: "rgba(205,142,94,.4)",
+    grad: "linear-gradient(180deg, rgba(205,142,94,.16), rgba(205,142,94,.03))" },
+];
 const PER_PAGE = 25;
 
-function PodiumSpot({ s, place }: { s: Standing; place: number }) {
+function PodiumSpot({ s, rank }: { s: Standing; rank: number }) {
+  const t = PODIUM_THEME[rank];
   return (
     <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 8, flex: 1 }}>
-      <Flag code={s.support} w={48} h={34} r={7} />
+      <div style={{ position: "relative" }}>
+        <Flag code={s.support} w={56} h={40} r={8} />
+        <span
+          title={`${rank + 1}.º puesto`}
+          style={{
+            position: "absolute",
+            right: -8,
+            bottom: -8,
+            width: 26,
+            height: 26,
+            display: "inline-flex",
+            alignItems: "center",
+            justifyContent: "center",
+            fontSize: "0.95rem",
+            borderRadius: "50%",
+            background: "var(--bg-solid)",
+            border: `1px solid ${t.border}`,
+          }}
+        >
+          {t.medal}
+        </span>
+      </div>
       <span style={{ fontWeight: 700, fontSize: "0.9rem", textAlign: "center" }}>
         {s.name} {s.championBonus && <span title="Acertó el campeón · +10">🏆</span>}
       </span>
-      <span className="display tabular" style={{ color: "var(--gold)" }}>{s.pts}</span>
+      <span className="display tabular" style={{ color: t.accent }}>{s.pts}</span>
       <div
         className="card"
         style={{
           width: "100%",
-          height: PODIUM_HEIGHT[place],
+          height: t.height,
           display: "flex",
           alignItems: "center",
           justifyContent: "center",
-          fontSize: "1.8rem",
-          background: place === 1 ? "var(--gold-soft)" : "var(--surface)",
-          borderColor: place === 1 ? "var(--gold-border)" : "var(--border)",
+          borderTopLeftRadius: 14,
+          borderTopRightRadius: 14,
+          background: t.grad,
+          borderColor: t.border,
         }}
       >
-        {MEDALS[place]}
+        <span
+          className="display tabular"
+          style={{ fontSize: "clamp(1.8rem, 6vw, 2.6rem)", fontWeight: 800, color: t.accent, opacity: 0.85 }}
+        >
+          {rank + 1}
+        </span>
       </div>
     </div>
   );
@@ -71,10 +105,10 @@ export default function RankingPage() {
         <>
           {/* Podio */}
           {podium.length >= 3 && (
-            <div style={{ display: "flex", alignItems: "flex-end", gap: 14, maxWidth: 560 }}>
+            <div style={{ display: "flex", alignItems: "flex-end", gap: 14, maxWidth: 560, width: "100%", margin: "0 auto" }}>
               {PODIUM_ORDER.map((idx, visual) => {
                 const s = standings[idx];
-                return s ? <PodiumSpot key={s.userId} s={s} place={idx} /> : <div key={visual} style={{ flex: 1 }} />;
+                return s ? <PodiumSpot key={s.userId} s={s} rank={idx} /> : <div key={visual} style={{ flex: 1 }} />;
               })}
             </div>
           )}
