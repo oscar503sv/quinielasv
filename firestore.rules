@@ -11,6 +11,25 @@ service cloud.firestore {
       return request.auth != null;
     }
 
+    function tournamentData() {
+      return get(/databases/$(database)/documents/tournament/config).data;
+    }
+
+    function matchData(matchId) {
+      return get(/databases/$(database)/documents/matches/$(matchId)).data;
+    }
+
+    // Un pronóstico solo es válido si: la quiniela no está congelada/finalizada,
+    // el partido sigue 'upcoming' y aún no pasó su cierre (lockAt). Devtools-proof.
+    function predictionAllowed(matchId) {
+      let t = tournamentData();
+      let m = matchData(matchId);
+      return t.predictionsLocked != true
+        && t.finished != true
+        && m.status == 'upcoming'
+        && m.lockAt > request.time.toMillis();
+    }
+
     // Catálogo: lectura para usuarios autenticados, escritura solo Admin SDK.
     match /teams/{code} {
       allow read: if signedIn();
@@ -37,11 +56,13 @@ service cloud.firestore {
     }
 
     // Pronósticos: lectura para autenticados (ranking/estadísticas); cada quien
-    // solo escribe los suyos. El doc id es `${uid}_${matchId}`.
+    // solo escribe los suyos, y solo si el torneo lo permite y el partido sigue
+    // abierto (validado server-side, no solo en la UI). El doc id es `${uid}_${matchId}`.
     match /predictions/{predId} {
       allow read: if signedIn();
       allow create, update: if signedIn()
-        && request.resource.data.userId == request.auth.uid;
+        && request.resource.data.userId == request.auth.uid
+        && predictionAllowed(request.resource.data.matchId);
       allow delete: if false;
     }
 
