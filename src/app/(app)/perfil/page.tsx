@@ -9,7 +9,6 @@ import { Pill } from "@/components/ui/Pill";
 import { Avatar } from "@/components/ui/Avatar";
 import { Flag } from "@/components/ui/Flag";
 import { ThemeToggle } from "@/components/ui/ThemeToggle";
-import { TeamPicker } from "@/features/profile/TeamPicker";
 import { useAuth } from "@/features/auth/AuthProvider";
 import { useData } from "@/features/data/DataProvider";
 import { updateUserDoc } from "@/repositories/users.client";
@@ -38,11 +37,6 @@ export default function PerfilPage() {
     } finally {
       setSavingName(false);
     }
-  }
-
-  async function selectSupport(code: string) {
-    if (!uid) return;
-    await updateUserDoc(uid, { support: code });
   }
 
   async function handleLogout() {
@@ -87,15 +81,25 @@ export default function PerfilPage() {
       </Card>
 
       {/* Equipo del corazón */}
-      <Card style={{ padding: 22, display: "flex", flexDirection: "column", gap: 14 }}>
-        <div>
-          <h2 style={{ margin: 0, fontSize: "1.15rem" }}>Tu equipo del corazón 💙</h2>
-          <p style={{ color: "var(--text-dim)", marginTop: 4, fontSize: "0.9rem" }}>
-            A quién le vas · su bandera es tu foto de perfil.
-          </p>
-        </div>
-        <TeamPicker selected={profile?.support ?? null} onSelect={selectSupport} />
-      </Card>
+      <Link href="/equipo">
+        <Card style={{ padding: 20, display: "flex", alignItems: "center", gap: 16, cursor: "pointer" }}>
+          <div style={{ flex: 1 }}>
+            <h2 style={{ margin: 0, fontSize: "1.15rem" }}>Tu equipo del corazón 💙</h2>
+            <p style={{ color: "var(--text-dim)", marginTop: 4, fontSize: "0.9rem" }}>
+              A quién le vas · su bandera es tu foto de perfil.
+            </p>
+          </div>
+          {profile?.support ? (
+            <span style={{ display: "inline-flex", alignItems: "center", gap: 10 }}>
+              <Flag code={profile.support} w={40} h={28} r={6} />
+              <span style={{ fontWeight: 600 }}>{teamName(profile.support)}</span>
+              <Pill tone="gold">✎ Cambiar</Pill>
+            </span>
+          ) : (
+            <Pill tone="gold">Elegir →</Pill>
+          )}
+        </Card>
+      </Link>
 
       {/* Campeón */}
       <Link href="/campeon">
@@ -110,6 +114,7 @@ export default function PerfilPage() {
             <span style={{ display: "inline-flex", alignItems: "center", gap: 10 }}>
               <Flag code={profile.championPrediction} w={40} h={28} r={6} />
               <span style={{ fontWeight: 600 }}>{teamName(profile.championPrediction)}</span>
+              <Pill tone="gold">✎ Cambiar</Pill>
             </span>
           ) : (
             <Pill tone="gold">Elegir →</Pill>
