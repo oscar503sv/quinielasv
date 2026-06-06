@@ -34,7 +34,7 @@ export default function EquipoPage() {
   }
 
   return (
-    <div style={{ display: "flex", flexDirection: "column", gap: 22, paddingBottom: 90 }}>
+    <div style={{ display: "flex", flexDirection: "column", gap: 22, paddingBottom: 120 }}>
       <div style={{ textAlign: "center", display: "flex", flexDirection: "column", gap: 8 }}>
         <span className="eyebrow">Tu equipo del corazón · 💙</span>
         <h1 style={{ fontSize: "2rem", margin: 0 }}>¿A quién le vas?</h1>
@@ -59,29 +59,25 @@ export default function EquipoPage() {
           zIndex: 30,
         }}
       >
-        <div
-          style={{
-            maxWidth: 1240,
-            margin: "0 auto",
-            display: "flex",
-            alignItems: "center",
-            gap: 14,
-          }}
-        >
-          <div style={{ display: "flex", alignItems: "center", gap: 10, flex: 1 }}>
+        <div className="sticky-actions">
+          <div className="sticky-actions-info">
             {selected ? (
               <>
                 <Flag code={selected} w={34} h={24} r={5} />
-                <span style={{ fontWeight: 600 }}>{teamName(selected)}</span>
+                <span style={{ fontWeight: 600, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+                  {teamName(selected)}
+                </span>
               </>
             ) : (
               <span style={{ color: "var(--text-dim)" }}>Elegí tu equipo…</span>
             )}
           </div>
-          <Button variant="ghost" onClick={() => router.back()}>Cancelar</Button>
-          <Button variant="gold" disabled={!selected || busy} onClick={confirm}>
-            {busy ? "Confirmando…" : "Confirmar equipo"}
-          </Button>
+          <div className="sticky-actions-btns">
+            <Button variant="ghost" onClick={() => router.back()}>Cancelar</Button>
+            <Button variant="gold" disabled={!selected || busy} onClick={confirm}>
+              {busy ? "Confirmando…" : "Confirmar equipo"}
+            </Button>
+          </div>
         </div>
       </div>
     </div>

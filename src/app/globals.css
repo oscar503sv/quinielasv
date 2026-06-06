@@ -431,6 +431,27 @@ a {
   background: var(--gold-soft);
 }
 
+/* ---- Barra de acción fija (equipo / campeón) ---- */
+.sticky-actions {
+  max-width: 1240px;
+  margin: 0 auto;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+.sticky-actions-info {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex: 1;
+  min-width: 0;
+}
+.sticky-actions-btns {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
 /* ---- Tabla de ranking ---- */
 .rank-table th,
 .rank-table td {
@@ -561,6 +582,14 @@ a {
   }
   .rank-table .col-abbr {
     display: inline;
+  }
+  .sticky-actions {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 12px;
+  }
+  .sticky-actions-btns > * {
+    flex: 1;
   }
 }
 
