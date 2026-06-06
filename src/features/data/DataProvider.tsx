@@ -12,12 +12,13 @@ import { subscribeMatches } from "@/repositories/matches.client";
 import { subscribeAllPredictions } from "@/repositories/predictions.client";
 import { subscribeAllUsers } from "@/repositories/users.client";
 import { subscribeTournament } from "@/repositories/tournament.client";
+import { subscribeMyLeagues } from "@/repositories/leagues.client";
 import {
   computeStandings,
   positionOf,
 } from "@/services/standings.service";
 import { useAuth } from "@/features/auth/AuthProvider";
-import type { Match, Prediction, Standing, Tournament, User } from "@/types";
+import type { League, Match, Prediction, Standing, Tournament, User } from "@/types";
 
 interface DataContextValue {
   matches: Match[];
@@ -27,6 +28,7 @@ interface DataContextValue {
   tournament: Tournament | null;
   standings: Standing[];
   myPosition: number;
+  myLeagues: League[];
   loading: boolean;
 }
 
@@ -38,6 +40,7 @@ export function DataProvider({ children }: { children: ReactNode }) {
   const [predictions, setPredictions] = useState<Prediction[]>([]);
   const [users, setUsers] = useState<User[]>([]);
   const [tournament, setTournament] = useState<Tournament | null>(null);
+  const [myLeagues, setMyLeagues] = useState<League[]>([]);
   const [ready, setReady] = useState({ m: false, p: false, u: false, t: false });
 
   useEffect(() => {
@@ -61,6 +64,16 @@ export function DataProvider({ children }: { children: ReactNode }) {
     ];
     return () => unsubs.forEach((fn) => fn());
   }, []);
+
+  // Las ligas son por usuario: re-suscribir cuando cambia el uid.
+  useEffect(() => {
+    if (!uid) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
+      setMyLeagues([]);
+      return;
+    }
+    return subscribeMyLeagues(uid, setMyLeagues);
+  }, [uid]);
 
   const standings = useMemo(
     () =>
@@ -95,6 +108,7 @@ export function DataProvider({ children }: { children: ReactNode }) {
         tournament,
         standings,
         myPosition,
+        myLeagues,
         loading,
       }}
     >

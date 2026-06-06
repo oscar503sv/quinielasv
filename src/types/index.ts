@@ -93,6 +93,18 @@ export interface Tournament {
   championLockAt: number | null;
 }
 
+/** Liga privada: clasificación entre amigos (subconjunto de jugadores). */
+export interface League {
+  id: string;
+  name: string;
+  /** Código para invitar/unirse, ej. "Q-3XF65". Único. */
+  code: string;
+  ownerUid: string;
+  /** UIDs de los miembros (incluye al dueño). */
+  memberUids: string[];
+  createdAt: number;
+}
+
 /** Usuario autenticado resuelto en el servidor. */
 export interface SessionUser {
   uid: string;

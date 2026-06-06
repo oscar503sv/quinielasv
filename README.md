@@ -25,6 +25,10 @@ Firebase Auth + Firestore (Client + Admin SDK) · TanStack Query · React Hook F
   validado server-side. Independiente del equipo del corazón.
 - **Ranking** (podio + tabla paginada, con bonos) y **estadísticas**. Desempate:
   puntos → más exactos → más diferencias exactas → mejor % de aciertos → alfabético.
+- **Ligas privadas**: pestaña "Mis ligas" en el ranking. Cada usuario crea hasta 2 ligas
+  (nombre + código `Q-XXXXX` para invitar), se une con código, y ve la clasificación de sus
+  miembros (mismo cálculo que el general). El dueño renombra / borra / expulsa; los demás
+  salen. Crear/unirse/gestionar pasa por `/api/leagues` (Admin SDK).
 - **Cómo se juega** (`/reglas`): explica el puntaje base, los multiplicadores, los bonos
   de campeón y de avance, y los criterios de desempate, con ejemplos.
 - **Panel admin** (`/admin`): partidos (ABM con filtros y paginación), resultados

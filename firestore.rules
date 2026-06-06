@@ -70,6 +70,14 @@ service cloud.firestore {
       allow delete: if false;
     }
 
+    // Ligas privadas: cada quien lee solo las ligas en las que es miembro
+    // (las queries usan array-contains del propio uid, que casa con esta regla).
+    // Crear/unirse/gestionar pasa por /api/leagues (Admin SDK), nunca desde el cliente.
+    match /leagues/{id} {
+      allow read: if signedIn() && request.auth.uid in resource.data.memberUids;
+      allow write: if false;
+    }
+
     // Colecciones reservadas a etapa 2 (materializadas por Admin SDK).
     match /standings/{userId} {
       allow read: if signedIn();

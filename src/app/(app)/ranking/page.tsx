@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/Button";
 import { Flag } from "@/components/ui/Flag";
 import { Pill } from "@/components/ui/Pill";
 import { useData } from "@/features/data/DataProvider";
+import { LeaguesPanel } from "@/features/leagues/LeaguesPanel";
 import { CHAMPION_BONUS } from "@/lib/scoring";
 import type { Standing } from "@/types";
 
@@ -78,6 +79,7 @@ function PodiumSpot({ s, rank }: { s: Standing; rank: number }) {
 export default function RankingPage() {
   const { standings, tournament, loading } = useData();
   const [page, setPage] = useState(0);
+  const [tab, setTab] = useState<"general" | "ligas">("general");
   const podium = PODIUM_ORDER.map((i) => standings[i]).filter(Boolean) as Standing[];
 
   // Paginación derivada en render (clamp por si la lista cambia en vivo).
@@ -98,7 +100,18 @@ export default function RankingPage() {
         </p>
       </div>
 
-      {loading ? (
+      <div className="tabs">
+        <button type="button" className="tab" data-active={tab === "general"} onClick={() => setTab("general")}>
+          General
+        </button>
+        <button type="button" className="tab" data-active={tab === "ligas"} onClick={() => setTab("ligas")}>
+          Mis ligas
+        </button>
+      </div>
+
+      {tab === "ligas" ? (
+        <LeaguesPanel />
+      ) : loading ? (
         <p style={{ color: "var(--text-dim)" }}>Cargando ranking…</p>
       ) : standings.length === 0 ? (
         <p style={{ color: "var(--text-dim)" }}>Sin jugadores aún.</p>
