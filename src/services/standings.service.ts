@@ -1,6 +1,10 @@
 import { totalPoints, basePoints, CHAMPION_BONUS } from "@/lib/scoring";
 import type { Match, Prediction, Standing, Tournament, User } from "@/types";
 
+/** Tasa de aciertos = pronósticos con puntos (5/3/1) sobre los hechos. */
+const hitRate = (s: Standing): number =>
+  s.played > 0 ? (s.played - s.miss) / s.played : 0;
+
 /**
  * Calcula el ranking/estadísticas on-the-fly desde los partidos finalizados,
  * los pronósticos y los usuarios. Función pura (testeable y reusable).
@@ -8,7 +12,7 @@ import type { Match, Prediction, Standing, Tournament, User } from "@/types";
  * lo acertaron.
  *
  * Desempate: puntos → más marcadores exactos → más diferencias exactas →
- * menos fallos → orden alfabético (fallback determinista).
+ * mejor % de aciertos → orden alfabético (fallback determinista).
  */
 export function computeStandings(
   matches: Match[],
@@ -62,7 +66,7 @@ export function computeStandings(
       b.pts - a.pts ||
       b.exact - a.exact ||
       b.gd - a.gd ||
-      a.miss - b.miss ||
+      hitRate(b) - hitRate(a) ||
       a.name.localeCompare(b.name),
   );
 }

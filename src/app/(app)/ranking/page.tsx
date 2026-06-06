@@ -164,7 +164,7 @@ export default function RankingPage() {
           </Card>
 
           <p style={{ color: "var(--text-dim)", fontSize: "0.8rem", margin: 0 }}>
-            En caso de empate: más exactos → más diferencias exactas → menos fallos.
+            En caso de empate: más exactos → más diferencias exactas → mejor % de aciertos.
           </p>
 
           {/* Paginación */}

@@ -56,7 +56,7 @@ const TIEBREAKS: { title: string; desc: string }[] = [
   { title: "Más puntos", desc: "El total acumulado en toda la quiniela." },
   { title: "Más marcadores exactos", desc: "Quién clavó más resultados justos (5 pts)." },
   { title: "Más diferencias exactas", desc: "Quién acertó más veces ganador y diferencia (3 pts)." },
-  { title: "Menos fallos", desc: "Quién tuvo menos pronósticos errados (0 pts)." },
+  { title: "Mejor porcentaje de aciertos", desc: "Aciertos (5/3/1 pts) sobre el total de pronósticos que hiciste." },
   { title: "Orden alfabético", desc: "Si todo lo anterior empata, por nombre." },
 ];
 
