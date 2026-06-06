@@ -15,11 +15,30 @@ const STATUSES: { value: MatchStatus; label: string }[] = [
   { value: "locked", label: "Bloqueado" },
 ];
 
-/** ms epoch → valor para <input type="datetime-local"> en hora local. */
-function toLocalInput(ms: number): string {
-  if (!ms) return "";
-  const d = new Date(ms - new Date().getTimezoneOffset() * 60000);
-  return d.toISOString().slice(0, 16);
+const pad = (n: number) => String(n).padStart(2, "0");
+
+/** Los pronósticos cierran 5 minutos antes del inicio del partido. */
+const LOCK_LEAD_MS = 5 * 60 * 1000;
+
+/** ms epoch → { date: 'YYYY-MM-DD', time: 'HH:mm' } en hora local. */
+function splitDateTime(ms: number): { date: string; time: string } {
+  if (!ms) return { date: "", time: "" };
+  const d = new Date(ms);
+  return {
+    date: `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`,
+    time: `${pad(d.getHours())}:${pad(d.getMinutes())}`,
+  };
+}
+
+/** Texto legible en español a partir del inicio del partido. Ej: "vie 5 jun · 18:00". */
+function formatDisplay(ms: number): string {
+  const d = new Date(ms);
+  const fecha = new Intl.DateTimeFormat("es", {
+    weekday: "short",
+    day: "numeric",
+    month: "short",
+  }).format(d);
+  return `${fecha} · ${pad(d.getHours())}:${pad(d.getMinutes())}`;
 }
 
 interface MatchFormProps {
@@ -30,12 +49,15 @@ interface MatchFormProps {
 }
 
 export function MatchForm({ initial, busy, onSubmit, onCancel }: MatchFormProps) {
+  // El partido inicia 5 min después del cierre guardado; reconstruimos el inicio.
+  const initKickoff = initial?.lockAt ? initial.lockAt + LOCK_LEAD_MS : 0;
+  const initDT = splitDateTime(initKickoff);
   const [home, setHome] = useState(initial?.home ?? TEAMS[0].code);
   const [away, setAway] = useState(initial?.away ?? TEAMS[1].code);
   const [stage, setStage] = useState<Match["stage"]>(initial?.stage ?? "group");
   const [status, setStatus] = useState<MatchStatus>(initial?.status ?? "upcoming");
-  const [date, setDate] = useState(initial?.date ?? "");
-  const [lockLocal, setLockLocal] = useState(toLocalInput(initial?.lockAt ?? 0));
+  const [date, setDate] = useState(initDT.date);
+  const [time, setTime] = useState(initDT.time);
   const [error, setError] = useState<string | null>(null);
 
   function submit() {
@@ -44,12 +66,24 @@ export function MatchForm({ initial, busy, onSubmit, onCancel }: MatchFormProps)
       setError("Local y visitante deben ser distintos.");
       return;
     }
-    const lockAt = lockLocal ? new Date(lockLocal).getTime() : 0;
-    if (!lockAt) {
-      setError("Definí el cierre de pronósticos.");
+    if (!date || !time) {
+      setError("Elegí la fecha y la hora del partido.");
       return;
     }
-    onSubmit({ home, away, stage, status, date: date || "Por definir", lockAt });
+    const kickoff = new Date(`${date}T${time}`).getTime();
+    if (!kickoff) {
+      setError("Fecha u hora inválida.");
+      return;
+    }
+    // El texto muestra el inicio; los pronósticos cierran 5 min antes.
+    onSubmit({
+      home,
+      away,
+      stage,
+      status,
+      date: formatDisplay(kickoff),
+      lockAt: kickoff - LOCK_LEAD_MS,
+    });
   }
 
   return (
@@ -102,24 +136,18 @@ export function MatchForm({ initial, busy, onSubmit, onCancel }: MatchFormProps)
           </select>
         </div>
         <div className="field">
-          <label>Texto de fecha</label>
-          <input
-            className="input"
-            placeholder="Hoy · 18:00"
-            value={date}
-            onChange={(e) => setDate(e.target.value)}
-          />
+          <label>Fecha del partido</label>
+          <input type="date" className="input" value={date} onChange={(e) => setDate(e.target.value)} />
         </div>
         <div className="field">
-          <label>Cierre de pronósticos</label>
-          <input
-            type="datetime-local"
-            className="input"
-            value={lockLocal}
-            onChange={(e) => setLockLocal(e.target.value)}
-          />
+          <label>Hora del partido</label>
+          <input type="time" className="input" value={time} onChange={(e) => setTime(e.target.value)} />
         </div>
       </div>
+
+      <p style={{ color: "var(--text-dim)", fontSize: "0.82rem", margin: 0 }}>
+        Los pronósticos se cierran automáticamente 5 minutos antes del inicio.
+      </p>
 
       {error && <span className="field-err">{error}</span>}
 
