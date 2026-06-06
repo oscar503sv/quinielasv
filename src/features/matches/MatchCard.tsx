@@ -11,6 +11,7 @@ import { teamName } from "@/constants/teams";
 import { resultKind, totalPoints } from "@/lib/scoring";
 import { lockLabel } from "@/lib/utils";
 import { clampScore } from "@/lib/score-utils";
+import { useNow } from "@/lib/use-now";
 import { fireConfetti } from "@/lib/confetti";
 import { useAuth } from "@/features/auth/AuthProvider";
 import { savePrediction, canPredict } from "@/services/predictions.service";
@@ -56,8 +57,9 @@ function PredictionLine({ pred }: { pred?: Prediction }) {
 
 export function MatchCard({ match, myPrediction }: MatchCardProps) {
   const { uid } = useAuth();
+  const now = useNow();
   const stage = STAGES[match.stage];
-  const open = canPredict(match);
+  const open = canPredict(match, now);
 
   const [home, setHome] = useState(myPrediction?.home ?? 0);
   const [away, setAway] = useState(myPrediction?.away ?? 0);
@@ -110,7 +112,7 @@ export function MatchCard({ match, myPrediction }: MatchCardProps) {
         ) : match.status === "locked" ? (
           <Pill tone="dim">🔒 Bloqueado</Pill>
         ) : (
-          <span style={{ fontSize: "0.78rem", color: "var(--text-dim)" }}>{lockLabel(match.lockAt)}</span>
+          <span style={{ fontSize: "0.78rem", color: "var(--text-dim)" }}>{lockLabel(match.lockAt, now)}</span>
         )}
       </div>
 
