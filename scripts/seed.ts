@@ -23,91 +23,122 @@ function initAdmin() {
   initializeApp({ credential: cert({ projectId, clientEmail, privateKey }) });
 }
 
-const HOUR = 3600_000;
-const now = Date.now();
+const LOCK_LEAD_MS = 5 * 60 * 1000; // los pronósticos cierran 5 min antes
 
-const MATCHES: Match[] = [
-  {
-    id: "m01",
-    home: "mx",
-    away: "ca",
-    stage: "group",
-    status: "finished",
-    date: "Ayer · 18:00",
-    lockAt: now - 24 * HOUR,
-    result: { home: 2, away: 1 },
-  },
-  {
-    id: "m02",
-    home: "ar",
-    away: "au",
-    stage: "group",
-    status: "finished",
-    date: "Ayer · 21:00",
-    lockAt: now - 22 * HOUR,
-    result: { home: 3, away: 0 },
-  },
-  {
-    id: "m03",
-    home: "fr",
-    away: "dk",
-    stage: "group",
-    status: "live",
-    date: "Hoy · en juego",
-    lockAt: now - HOUR,
-    result: { home: 1, away: 1 },
-  },
-  {
-    id: "m04",
-    home: "es",
-    away: "de",
-    stage: "group",
-    status: "upcoming",
-    date: "Hoy · 18:00",
-    lockAt: now + 3 * HOUR,
-    result: null,
-  },
-  {
-    id: "m05",
-    home: "br",
-    away: "rs",
-    stage: "group",
-    status: "upcoming",
-    date: "Hoy · 21:00",
-    lockAt: now + 6 * HOUR,
-    result: null,
-  },
-  {
-    id: "m06",
-    home: "gb-eng",
-    away: "ir",
-    stage: "group",
-    status: "upcoming",
-    date: "Mañana · 15:00",
-    lockAt: now + 27 * HOUR,
-    result: null,
-  },
-  {
-    id: "m07",
-    home: "pt",
-    away: "uy",
-    stage: "round_of_16",
-    status: "upcoming",
-    date: "Sáb · 18:00",
-    lockAt: now + 3 * 24 * HOUR,
-    result: null,
-  },
-  {
-    id: "m08",
-    home: "nl",
-    away: "qa",
-    stage: "quarterfinal",
-    status: "locked",
-    date: "Por definir",
-    lockAt: now + 10 * 24 * HOUR,
-    result: null,
-  },
+// Formato legible en hora de El Salvador → "jue 11 jun · 13:00".
+const esFmt = new Intl.DateTimeFormat("es", {
+  weekday: "short",
+  day: "numeric",
+  month: "short",
+  hour: "2-digit",
+  minute: "2-digit",
+  hour12: false,
+  timeZone: "America/El_Salvador",
+});
+function fmtDate(ms: number): string {
+  const p = Object.fromEntries(
+    esFmt.formatToParts(ms).map((x) => [x.type, x.value]),
+  );
+  const clean = (s: string) => (s ?? "").replace(/\./g, "");
+  return `${clean(p.weekday)} ${p.day} ${clean(p.month)} · ${p.hour}:${p.minute}`;
+}
+
+/**
+ * 72 partidos de fase de grupos del Mundial 2026.
+ * Tupla [local, visitante, kickoff en hora del Este (EDT = UTC-04:00)].
+ * Fuente: fixture de ESPN. Hora mostrada convertida a America/El_Salvador.
+ */
+const FIXTURES: [string, string, string][] = [
+  // Jornada 1
+  ["mx", "za", "2026-06-11T15:00:00-04:00"],
+  ["kr", "cz", "2026-06-11T22:00:00-04:00"],
+  ["ca", "ba", "2026-06-12T15:00:00-04:00"],
+  ["us", "py", "2026-06-12T21:00:00-04:00"],
+  ["qa", "ch", "2026-06-13T15:00:00-04:00"],
+  ["br", "ma", "2026-06-13T18:00:00-04:00"],
+  ["ht", "gb-sct", "2026-06-13T21:00:00-04:00"],
+  ["au", "tr", "2026-06-14T00:00:00-04:00"],
+  ["de", "cw", "2026-06-14T13:00:00-04:00"],
+  ["nl", "jp", "2026-06-14T16:00:00-04:00"],
+  ["ci", "ec", "2026-06-14T19:00:00-04:00"],
+  ["se", "tn", "2026-06-14T22:00:00-04:00"],
+  ["es", "cv", "2026-06-15T13:00:00-04:00"],
+  ["be", "eg", "2026-06-15T18:00:00-04:00"],
+  ["sa", "uy", "2026-06-15T18:00:00-04:00"],
+  ["ir", "nz", "2026-06-16T00:00:00-04:00"],
+  ["fr", "sn", "2026-06-16T15:00:00-04:00"],
+  ["iq", "no", "2026-06-16T18:00:00-04:00"],
+  ["ar", "dz", "2026-06-16T21:00:00-04:00"],
+  ["at", "jo", "2026-06-17T00:00:00-04:00"],
+  ["pt", "cd", "2026-06-17T13:00:00-04:00"],
+  ["gb-eng", "hr", "2026-06-17T16:00:00-04:00"],
+  ["gh", "pa", "2026-06-17T19:00:00-04:00"],
+  ["uz", "co", "2026-06-17T22:00:00-04:00"],
+  // Jornada 2
+  ["cz", "za", "2026-06-18T12:00:00-04:00"],
+  ["ch", "ba", "2026-06-18T15:00:00-04:00"],
+  ["ca", "qa", "2026-06-18T18:00:00-04:00"],
+  ["mx", "kr", "2026-06-18T23:00:00-04:00"],
+  ["us", "au", "2026-06-19T15:00:00-04:00"],
+  ["gb-sct", "ma", "2026-06-19T18:00:00-04:00"],
+  ["br", "ht", "2026-06-19T21:00:00-04:00"],
+  ["tr", "py", "2026-06-20T00:00:00-04:00"],
+  ["nl", "se", "2026-06-20T13:00:00-04:00"],
+  ["de", "ci", "2026-06-20T16:00:00-04:00"],
+  ["ec", "cw", "2026-06-20T20:00:00-04:00"],
+  ["tn", "jp", "2026-06-21T00:00:00-04:00"],
+  ["es", "sa", "2026-06-21T12:00:00-04:00"],
+  ["be", "ir", "2026-06-21T15:00:00-04:00"],
+  ["uy", "cv", "2026-06-21T18:00:00-04:00"],
+  ["nz", "eg", "2026-06-21T21:00:00-04:00"],
+  ["ar", "at", "2026-06-22T13:00:00-04:00"],
+  ["fr", "iq", "2026-06-22T17:00:00-04:00"],
+  ["no", "sn", "2026-06-22T20:00:00-04:00"],
+  ["jo", "dz", "2026-06-22T23:00:00-04:00"],
+  ["pt", "uz", "2026-06-23T13:00:00-04:00"],
+  ["gb-eng", "gh", "2026-06-23T16:00:00-04:00"],
+  ["pa", "hr", "2026-06-23T19:00:00-04:00"],
+  ["co", "cd", "2026-06-23T22:00:00-04:00"],
+  // Jornada 3
+  ["ch", "ca", "2026-06-24T15:00:00-04:00"],
+  ["ba", "qa", "2026-06-24T15:00:00-04:00"],
+  ["gb-sct", "br", "2026-06-24T18:00:00-04:00"],
+  ["ma", "ht", "2026-06-24T18:00:00-04:00"],
+  ["cz", "mx", "2026-06-24T21:00:00-04:00"],
+  ["za", "kr", "2026-06-24T21:00:00-04:00"],
+  ["ec", "de", "2026-06-25T16:00:00-04:00"],
+  ["cw", "ci", "2026-06-25T16:00:00-04:00"],
+  ["jp", "se", "2026-06-25T19:00:00-04:00"],
+  ["tn", "nl", "2026-06-25T19:00:00-04:00"],
+  ["tr", "us", "2026-06-25T22:00:00-04:00"],
+  ["py", "au", "2026-06-25T22:00:00-04:00"],
+  ["no", "fr", "2026-06-26T15:00:00-04:00"],
+  ["sn", "iq", "2026-06-26T15:00:00-04:00"],
+  ["uy", "es", "2026-06-26T20:00:00-04:00"],
+  ["cv", "sa", "2026-06-26T20:00:00-04:00"],
+  ["eg", "ir", "2026-06-26T23:00:00-04:00"],
+  ["nz", "be", "2026-06-26T23:00:00-04:00"],
+  ["pa", "gb-eng", "2026-06-27T17:00:00-04:00"],
+  ["hr", "gh", "2026-06-27T17:00:00-04:00"],
+  ["co", "pt", "2026-06-27T19:30:00-04:00"],
+  ["cd", "uz", "2026-06-27T19:30:00-04:00"],
+  ["dz", "at", "2026-06-27T22:00:00-04:00"],
+  ["jo", "ar", "2026-06-27T22:00:00-04:00"],
 ];
+
+const MATCHES: Match[] = FIXTURES.map(([home, away, et], i) => {
+  const kickoff = Date.parse(et);
+  return {
+    id: `m${String(i + 1).padStart(2, "0")}`,
+    home,
+    away,
+    stage: "group",
+    status: "upcoming",
+    date: fmtDate(kickoff),
+    lockAt: kickoff - LOCK_LEAD_MS,
+    result: null,
+  };
+});
 
 async function main() {
   initAdmin();

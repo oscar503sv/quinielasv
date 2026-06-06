@@ -1,71 +1,70 @@
 import type { Team } from "@/types";
 
 /**
- * 48 selecciones del Mundial 2026, agrupadas A–L (4 por grupo).
- * `code` es el ISO usado por flagcdn (Inglaterra = "gb-eng", Gales = "gb-wls",
- * Escocia = "gb-sct"). Los grupos son provisionales para el demo.
+ * 48 selecciones del Mundial 2026, según el sorteo final (grupos A–L).
+ * `code` es el ISO usado por flagcdn (Inglaterra = "gb-eng", Escocia = "gb-sct").
  */
 export const TEAMS: Team[] = [
   // Grupo A
   { code: "mx", name: "México", group: "A" },
-  { code: "ca", name: "Canadá", group: "A" },
-  { code: "us", name: "Estados Unidos", group: "A" },
-  { code: "pa", name: "Panamá", group: "A" },
+  { code: "za", name: "Sudáfrica", group: "A" },
+  { code: "kr", name: "Corea del Sur", group: "A" },
+  { code: "cz", name: "Chequia", group: "A" },
   // Grupo B
-  { code: "ar", name: "Argentina", group: "B" },
-  { code: "sa", name: "Arabia Saudita", group: "B" },
-  { code: "pl", name: "Polonia", group: "B" },
-  { code: "au", name: "Australia", group: "B" },
+  { code: "ca", name: "Canadá", group: "B" },
+  { code: "ba", name: "Bosnia y Herzegovina", group: "B" },
+  { code: "qa", name: "Catar", group: "B" },
+  { code: "ch", name: "Suiza", group: "B" },
   // Grupo C
-  { code: "fr", name: "Francia", group: "C" },
-  { code: "dk", name: "Dinamarca", group: "C" },
-  { code: "tn", name: "Túnez", group: "C" },
-  { code: "pe", name: "Perú", group: "C" },
+  { code: "br", name: "Brasil", group: "C" },
+  { code: "ma", name: "Marruecos", group: "C" },
+  { code: "ht", name: "Haití", group: "C" },
+  { code: "gb-sct", name: "Escocia", group: "C" },
   // Grupo D
-  { code: "es", name: "España", group: "D" },
-  { code: "cr", name: "Costa Rica", group: "D" },
-  { code: "de", name: "Alemania", group: "D" },
-  { code: "jp", name: "Japón", group: "D" },
+  { code: "us", name: "Estados Unidos", group: "D" },
+  { code: "py", name: "Paraguay", group: "D" },
+  { code: "au", name: "Australia", group: "D" },
+  { code: "tr", name: "Turquía", group: "D" },
   // Grupo E
-  { code: "be", name: "Bélgica", group: "E" },
-  { code: "ma", name: "Marruecos", group: "E" },
-  { code: "hr", name: "Croacia", group: "E" },
-  { code: "kr", name: "Corea del Sur", group: "E" },
+  { code: "de", name: "Alemania", group: "E" },
+  { code: "cw", name: "Curazao", group: "E" },
+  { code: "ci", name: "Costa de Marfil", group: "E" },
+  { code: "ec", name: "Ecuador", group: "E" },
   // Grupo F
-  { code: "br", name: "Brasil", group: "F" },
-  { code: "rs", name: "Serbia", group: "F" },
-  { code: "ch", name: "Suiza", group: "F" },
-  { code: "cm", name: "Camerún", group: "F" },
+  { code: "nl", name: "Países Bajos", group: "F" },
+  { code: "jp", name: "Japón", group: "F" },
+  { code: "se", name: "Suecia", group: "F" },
+  { code: "tn", name: "Túnez", group: "F" },
   // Grupo G
-  { code: "gb-eng", name: "Inglaterra", group: "G" },
+  { code: "be", name: "Bélgica", group: "G" },
+  { code: "eg", name: "Egipto", group: "G" },
   { code: "ir", name: "Irán", group: "G" },
-  { code: "gb-wls", name: "Gales", group: "G" },
-  { code: "ec", name: "Ecuador", group: "G" },
+  { code: "nz", name: "Nueva Zelanda", group: "G" },
   // Grupo H
-  { code: "pt", name: "Portugal", group: "H" },
-  { code: "gh", name: "Ghana", group: "H" },
+  { code: "es", name: "España", group: "H" },
+  { code: "cv", name: "Cabo Verde", group: "H" },
+  { code: "sa", name: "Arabia Saudita", group: "H" },
   { code: "uy", name: "Uruguay", group: "H" },
-  { code: "sn", name: "Senegal", group: "H" },
   // Grupo I
-  { code: "nl", name: "Países Bajos", group: "I" },
-  { code: "qa", name: "Catar", group: "I" },
-  { code: "gb-sct", name: "Escocia", group: "I" },
-  { code: "ci", name: "Costa de Marfil", group: "I" },
+  { code: "fr", name: "Francia", group: "I" },
+  { code: "sn", name: "Senegal", group: "I" },
+  { code: "iq", name: "Irak", group: "I" },
+  { code: "no", name: "Noruega", group: "I" },
   // Grupo J
-  { code: "co", name: "Colombia", group: "J" },
-  { code: "ng", name: "Nigeria", group: "J" },
-  { code: "no", name: "Noruega", group: "J" },
+  { code: "ar", name: "Argentina", group: "J" },
   { code: "dz", name: "Argelia", group: "J" },
+  { code: "at", name: "Austria", group: "J" },
+  { code: "jo", name: "Jordania", group: "J" },
   // Grupo K
-  { code: "cl", name: "Chile", group: "K" },
-  { code: "eg", name: "Egipto", group: "K" },
-  { code: "se", name: "Suecia", group: "K" },
-  { code: "at", name: "Austria", group: "K" },
+  { code: "pt", name: "Portugal", group: "K" },
+  { code: "cd", name: "RD Congo", group: "K" },
+  { code: "uz", name: "Uzbekistán", group: "K" },
+  { code: "co", name: "Colombia", group: "K" },
   // Grupo L
-  { code: "py", name: "Paraguay", group: "L" },
-  { code: "ve", name: "Venezuela", group: "L" },
-  { code: "ua", name: "Ucrania", group: "L" },
-  { code: "it", name: "Italia", group: "L" },
+  { code: "gb-eng", name: "Inglaterra", group: "L" },
+  { code: "hr", name: "Croacia", group: "L" },
+  { code: "gh", name: "Ghana", group: "L" },
+  { code: "pa", name: "Panamá", group: "L" },
 ];
 
 /** Acceso directo por código. */
