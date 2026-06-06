@@ -14,12 +14,14 @@ import { useData } from "@/features/data/DataProvider";
 import { updateUserDoc } from "@/repositories/users.client";
 import { logout } from "@/features/auth/auth-client";
 import { teamName } from "@/constants/teams";
+import { isChampionOpen } from "@/lib/champion";
 
 export default function PerfilPage() {
   const router = useRouter();
   const { uid, email, profile } = useAuth();
-  const { standings, myPosition } = useData();
+  const { standings, myPosition, tournament } = useData();
   const me = standings.find((s) => s.me);
+  const championOpen = isChampionOpen(tournament);
 
   const [name, setName] = useState("");
   const [savingName, setSavingName] = useState(false);
@@ -114,10 +116,14 @@ export default function PerfilPage() {
             <span style={{ display: "inline-flex", alignItems: "center", gap: 10 }}>
               <Flag code={profile.championPrediction} w={40} h={28} r={6} />
               <span style={{ fontWeight: 600 }}>{teamName(profile.championPrediction)}</span>
-              <Pill tone="gold">✎ Cambiar</Pill>
+              <Pill tone={championOpen ? "gold" : "dim"}>
+                {championOpen ? "✎ Cambiar" : "🔒 Cerrado"}
+              </Pill>
             </span>
           ) : (
-            <Pill tone="gold">Elegir →</Pill>
+            <Pill tone={championOpen ? "gold" : "dim"}>
+              {championOpen ? "Elegir →" : "🔒 Cerrado"}
+            </Pill>
           )}
         </Card>
       </Link>

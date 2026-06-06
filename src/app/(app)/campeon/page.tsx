@@ -4,17 +4,32 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/Button";
 import { Flag } from "@/components/ui/Flag";
+import { Pill } from "@/components/ui/Pill";
 import { TeamPicker } from "@/features/profile/TeamPicker";
 import { useAuth } from "@/features/auth/AuthProvider";
-import { updateUserDoc } from "@/repositories/users.client";
+import { useData } from "@/features/data/DataProvider";
+import { setChampion } from "@/features/profile/champion-client";
 import { teamName } from "@/constants/teams";
+import { isChampionOpen } from "@/lib/champion";
 import { fireConfetti } from "@/lib/confetti";
+
+function formatDeadline(ms: number): string {
+  return new Intl.DateTimeFormat("es", {
+    dateStyle: "long",
+    timeStyle: "short",
+  }).format(new Date(ms));
+}
 
 export default function CampeonPage() {
   const router = useRouter();
   const { uid, profile } = useAuth();
+  const { tournament } = useData();
   const [selected, setSelected] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  const open = isChampionOpen(tournament);
+  const lockAt = tournament?.championLockAt ?? null;
 
   useEffect(() => {
     // eslint-disable-next-line react-hooks/set-state-in-effect
@@ -24,10 +39,13 @@ export default function CampeonPage() {
   async function confirm() {
     if (!uid || !selected) return;
     setBusy(true);
+    setError(null);
     try {
-      await updateUserDoc(uid, { championPrediction: selected });
+      await setChampion(selected);
       fireConfetti();
       router.push("/dashboard");
+    } catch (e) {
+      setError(e instanceof Error ? e.message : "No se pudo guardar tu campeón.");
     } finally {
       setBusy(false);
     }
@@ -42,9 +60,35 @@ export default function CampeonPage() {
           Elegí la selección que creés que va a ganar el Mundial. Si acertás, sumás
           +10 puntos al final del torneo.
         </p>
+        {open && lockAt && (
+          <span style={{ fontSize: "0.84rem", color: "var(--text-dim)" }}>
+            Podés elegir o cambiarlo hasta el <strong>{formatDeadline(lockAt)}</strong>.
+          </span>
+        )}
       </div>
 
-      <TeamPicker selected={selected} onSelect={setSelected} />
+      {!open && (
+        <div
+          className="card"
+          style={{
+            padding: 16,
+            textAlign: "center",
+            borderColor: "var(--gold-border)",
+            background: "var(--gold-soft)",
+          }}
+        >
+          🔒 El plazo para elegir o cambiar tu campeón ya cerró
+          {profile?.championPrediction ? (
+            <>
+              {" "}· tu campeón es <strong>{teamName(profile.championPrediction)}</strong>.
+            </>
+          ) : (
+            <> y no elegiste ninguno.</>
+          )}
+        </div>
+      )}
+
+      <TeamPicker selected={selected} onSelect={setSelected} disabled={!open} />
 
       {/* Barra sticky */}
       <div
@@ -59,15 +103,7 @@ export default function CampeonPage() {
           zIndex: 30,
         }}
       >
-        <div
-          style={{
-            maxWidth: 1240,
-            margin: "0 auto",
-            display: "flex",
-            alignItems: "center",
-            gap: 14,
-          }}
-        >
+        <div style={{ maxWidth: 1240, margin: "0 auto", display: "flex", alignItems: "center", gap: 14 }}>
           <div style={{ display: "flex", alignItems: "center", gap: 10, flex: 1 }}>
             {selected ? (
               <>
@@ -77,11 +113,17 @@ export default function CampeonPage() {
             ) : (
               <span style={{ color: "var(--text-dim)" }}>Elegí tu campeón…</span>
             )}
+            {!open && <Pill tone="dim">🔒 Cerrado</Pill>}
           </div>
-          <Button variant="ghost" onClick={() => router.back()}>Cancelar</Button>
-          <Button variant="gold" disabled={!selected || busy} onClick={confirm}>
-            {busy ? "Confirmando…" : "Confirmar campeón"}
+          {error && <span className="field-err">{error}</span>}
+          <Button variant="ghost" onClick={() => router.back()}>
+            {open ? "Cancelar" : "Volver"}
           </Button>
+          {open && (
+            <Button variant="gold" disabled={!selected || busy} onClick={confirm}>
+              {busy ? "Confirmando…" : "Confirmar campeón"}
+            </Button>
+          )}
         </div>
       </div>
     </div>

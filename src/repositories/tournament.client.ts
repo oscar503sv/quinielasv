@@ -11,6 +11,7 @@ const FALLBACK: Tournament = {
   finished: false,
   predictionsLocked: false,
   champion: null,
+  championLockAt: null,
 };
 
 function toTournament(data: Record<string, unknown> | undefined): Tournament {
@@ -21,6 +22,7 @@ function toTournament(data: Record<string, unknown> | undefined): Tournament {
     finished: Boolean(data.finished),
     predictionsLocked: Boolean(data.predictionsLocked),
     champion: (data.champion as string | null) ?? null,
+    championLockAt: (data.championLockAt as number | null) ?? null,
   };
 }
 

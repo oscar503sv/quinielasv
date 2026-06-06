@@ -130,13 +130,16 @@ async function main() {
   await matchBatch.commit();
   console.log(`✓ ${MATCHES.length} partidos`);
 
-  // Tournament
+  // Tournament — el cierre para elegir campeón es 5 min antes del partido
+  // inaugural (jue 11 jun 2026, 12:55 America/El_Salvador = UTC-6).
+  const championLockAt = new Date("2026-06-11T12:55:00-06:00").getTime();
   await db.collection("tournament").doc("config").set({
     name: "Quiniela Mundial 2026",
     started: true,
     finished: false,
     predictionsLocked: false,
     champion: null,
+    championLockAt,
   });
   console.log("✓ torneo");
 

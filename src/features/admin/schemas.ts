@@ -43,6 +43,7 @@ export const tournamentSchema = z.object({
   finished: z.boolean().optional(),
   predictionsLocked: z.boolean().optional(),
   champion: z.string().nullable().optional(),
+  championLockAt: z.number().int().positive().nullable().optional(),
 });
 
 export type MatchFormValues = z.infer<typeof matchInputSchema>;

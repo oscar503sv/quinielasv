@@ -93,6 +93,23 @@ export async function updateTournament(
     .set(patch, { merge: true });
 }
 
+/** Lee el deadline de elección de campeón desde el doc de torneo. */
+export async function getChampionLockAt(): Promise<number | null> {
+  const snap = await getAdminDb().collection("tournament").doc("config").get();
+  return snap.exists ? ((snap.data()?.championLockAt as number | null) ?? null) : null;
+}
+
+/** Escribe la predicción de campeón de un jugador (vía Admin SDK). */
+export async function setChampionPrediction(
+  uid: string,
+  champion: string,
+): Promise<void> {
+  await getAdminDb()
+    .collection("users")
+    .doc(uid)
+    .set({ championPrediction: champion }, { merge: true });
+}
+
 export interface AuditEntry {
   action: string;
   entityType: string;

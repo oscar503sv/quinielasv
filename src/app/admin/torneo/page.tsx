@@ -12,6 +12,19 @@ import { teamName } from "@/constants/teams";
 import { fireConfetti } from "@/lib/confetti";
 import type { Tournament } from "@/types";
 
+const pad = (n: number) => String(n).padStart(2, "0");
+
+/** ms epoch → valor para <input type="datetime-local"> en hora local. */
+function toLocalInput(ms: number | null | undefined): string {
+  if (!ms) return "";
+  const d = new Date(ms);
+  return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`;
+}
+
+function formatDeadline(ms: number): string {
+  return new Intl.DateTimeFormat("es", { dateStyle: "long", timeStyle: "short" }).format(new Date(ms));
+}
+
 interface ToggleProps {
   label: string;
   desc: string;
@@ -67,6 +80,8 @@ export default function AdminTorneoPage() {
   const [busy, setBusy] = useState(false);
   const [champion, setChampion] = useState<string | null>(null);
   const [savingChamp, setSavingChamp] = useState(false);
+  const [lockInput, setLockInput] = useState<string | null>(null);
+  const [savingLock, setSavingLock] = useState(false);
 
   const selectedChampion = champion ?? tournament?.champion ?? null;
 
@@ -76,6 +91,18 @@ export default function AdminTorneoPage() {
       await updateTournament({ [field]: value });
     } finally {
       setBusy(false);
+    }
+  }
+
+  async function saveLock() {
+    if (!lockInput) return;
+    const ms = new Date(lockInput).getTime();
+    if (!ms) return;
+    setSavingLock(true);
+    try {
+      await updateTournament({ championLockAt: ms });
+    } finally {
+      setSavingLock(false);
     }
   }
 
@@ -120,6 +147,35 @@ export default function AdminTorneoPage() {
             busy={busy}
             onChange={(v) => patch("finished", v)}
           />
+        </div>
+      </Card>
+
+      <Card style={{ padding: 22, display: "flex", flexDirection: "column", gap: 14 }}>
+        <div>
+          <h2 style={{ margin: 0, fontSize: "1.15rem" }}>Cierre de elección de campeón ⏰</h2>
+          <p style={{ color: "var(--text-dim)", marginTop: 4, fontSize: "0.9rem" }}>
+            Después de esta fecha, los jugadores ya no pueden elegir ni cambiar su
+            campeón (típicamente 5 min antes del partido inaugural).
+          </p>
+        </div>
+        {tournament?.championLockAt && (
+          <span style={{ fontSize: "0.86rem", color: "var(--text-dim)" }}>
+            Actual: <strong>{formatDeadline(tournament.championLockAt)}</strong>
+          </span>
+        )}
+        <div style={{ display: "flex", gap: 10, flexWrap: "wrap", alignItems: "flex-end" }}>
+          <div className="field" style={{ flex: 1, minWidth: 220 }}>
+            <label>Fecha y hora de cierre</label>
+            <input
+              type="datetime-local"
+              className="input"
+              value={lockInput ?? toLocalInput(tournament?.championLockAt)}
+              onChange={(e) => setLockInput(e.target.value)}
+            />
+          </div>
+          <Button variant="gold" disabled={savingLock} onClick={saveLock}>
+            {savingLock ? "Guardando…" : "Guardar cierre"}
+          </Button>
         </div>
       </Card>
 

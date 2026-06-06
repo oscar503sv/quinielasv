@@ -84,7 +84,9 @@ export interface Tournament {
   started: boolean;
   finished: boolean;
   predictionsLocked: boolean;
-  champion: string | null; // team code
+  champion: string | null; // team code (campeón oficial, lo define el admin)
+  /** Cierre para que los jugadores elijan/cambien su campeón (epoch ms). null = sin límite. */
+  championLockAt: number | null;
 }
 
 /** Usuario autenticado resuelto en el servidor. */

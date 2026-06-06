@@ -26,10 +26,13 @@ service cloud.firestore {
     }
 
     // Perfiles: cualquiera autenticado los lee (para el ranking); cada quien
-    // solo edita el suyo.
+    // solo edita el suyo. La predicción de campeón NO se puede cambiar desde el
+    // cliente: pasa por /api/champion (Admin SDK), que valida el deadline.
     match /users/{userId} {
       allow read: if signedIn();
-      allow create, update: if signedIn() && request.auth.uid == userId;
+      allow create: if signedIn() && request.auth.uid == userId;
+      allow update: if signedIn() && request.auth.uid == userId
+        && request.resource.data.championPrediction == resource.data.championPrediction;
       allow delete: if false;
     }
 

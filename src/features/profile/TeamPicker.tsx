@@ -6,18 +6,20 @@ import { TEAMS } from "@/constants/teams";
 interface TeamPickerProps {
   selected: string | null;
   onSelect: (code: string) => void;
+  disabled?: boolean;
 }
 
 /** Grid de las 48 selecciones; la elegida se resalta con borde dorado + ✓. */
-export function TeamPicker({ selected, onSelect }: TeamPickerProps) {
+export function TeamPicker({ selected, onSelect, disabled }: TeamPickerProps) {
   return (
-    <div className="team-grid">
+    <div className="team-grid" style={{ opacity: disabled ? 0.55 : 1 }}>
       {TEAMS.map((t) => {
         const active = t.code === selected;
         return (
           <button
             key={t.code}
             type="button"
+            disabled={disabled}
             onClick={() => onSelect(t.code)}
             className="card"
             style={{
@@ -25,7 +27,7 @@ export function TeamPicker({ selected, onSelect }: TeamPickerProps) {
               display: "flex",
               alignItems: "center",
               gap: 9,
-              cursor: "pointer",
+              cursor: disabled ? "not-allowed" : "pointer",
               textAlign: "left",
               borderColor: active ? "var(--gold-border)" : "var(--border)",
               background: active ? "var(--gold-soft)" : "var(--surface)",
