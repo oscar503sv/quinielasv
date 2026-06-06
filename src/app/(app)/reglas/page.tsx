@@ -330,16 +330,20 @@ export default function ReglasPage() {
         <Card style={{ padding: 22, display: "flex", flexDirection: "column", gap: 14 }}>
           <p style={{ margin: 0, color: "var(--text-dim)" }}>
             Pronosticaste <strong style={{ color: "var(--text)" }}>2–1</strong> en una{" "}
-            <strong style={{ color: "var(--text)" }}>semifinal</strong> y el partido terminó{" "}
-            <strong style={{ color: "var(--text)" }}>2–1</strong>:
+            <strong style={{ color: "var(--text)" }}>semifinal</strong>, salió{" "}
+            <strong style={{ color: "var(--text)" }}>2–1</strong> y tu ganador avanzó a la final:
           </p>
           <div style={{ display: "flex", alignItems: "center", gap: 12, flexWrap: "wrap" }}>
             <Pill tone="gold">Marcador exacto</Pill>
             <span className="tabular" style={{ color: "var(--text-dim)" }}>5 base</span>
             <span style={{ color: "var(--text-faint)" }}>×</span>
             <Pill tone="gold">Semifinal ×3</Pill>
+            <span style={{ color: "var(--text-faint)" }}>+</span>
+            <Pill tone="gold">🎯 +{ADVANCE_BONUS}</Pill>
             <span style={{ color: "var(--text-faint)" }}>=</span>
-            <span className="display tabular" style={{ fontSize: "1.8rem", color: "var(--good)" }}>15 puntos 🔥</span>
+            <span className="display tabular" style={{ fontSize: "1.8rem", color: "var(--good)" }}>
+              {5 * 3 + ADVANCE_BONUS} puntos 🔥
+            </span>
           </div>
         </Card>
       </Section>
