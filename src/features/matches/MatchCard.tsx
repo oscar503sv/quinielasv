@@ -8,7 +8,7 @@ import { Flag } from "@/components/ui/Flag";
 import { ScoreStepper } from "@/components/ui/ScoreStepper";
 import { STAGES, isKnockout } from "@/constants/stages";
 import { teamName } from "@/constants/teams";
-import { resultKind, totalPoints, advanceBonus, ADVANCE_BONUS } from "@/lib/scoring";
+import { resultKind, totalPoints, advanceBonus, resolveAdvancer, ADVANCE_BONUS } from "@/lib/scoring";
 import { lockLabel } from "@/lib/utils";
 import { clampScore } from "@/lib/score-utils";
 import { useNow } from "@/lib/use-now";
@@ -85,18 +85,23 @@ export function MatchCard({ match, myPrediction }: MatchCardProps) {
     }
   }, [myPrediction]);
 
+  // "Quién avanza" solo cuenta en eliminatorias y si el marcador es empate
+  // (con ganador, avanza el ganador del marcador). Lo demás se guarda como null.
+  const isDraw = home === away;
+  const effectiveAdvances = knockout && isDraw ? advances : null;
+
   const dirty =
     !myPrediction ||
     myPrediction.home !== home ||
     myPrediction.away !== away ||
-    (myPrediction.advances ?? null) !== advances;
+    (myPrediction.advances ?? null) !== effectiveAdvances;
 
   async function handleSave() {
     if (!uid) return;
     setBusy(true);
     setError(null);
     try {
-      await savePrediction(uid, match, { home, away }, advances, frozen);
+      await savePrediction(uid, match, { home, away }, effectiveAdvances, frozen);
       setSaved(true);
       fireConfetti();
       setTimeout(() => setSaved(false), 2500);
@@ -156,10 +161,10 @@ export function MatchCard({ match, myPrediction }: MatchCardProps) {
               />
             </div>
           </div>
-          {knockout && (
+          {knockout && (isDraw ? (
             <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
               <span style={{ fontSize: "0.8rem", color: "var(--text-dim)" }}>
-                {advanceLabel} <span style={{ color: "var(--gold)" }}>+{ADVANCE_BONUS}</span>
+                Empate · {advanceLabel} <span style={{ color: "var(--gold)" }}>+{ADVANCE_BONUS}</span>
               </span>
               <div style={{ display: "flex", gap: 8 }}>
                 {[match.home, match.away].map((code) => {
@@ -193,7 +198,11 @@ export function MatchCard({ match, myPrediction }: MatchCardProps) {
                 })}
               </div>
             </div>
-          )}
+          ) : (
+            <span style={{ fontSize: "0.8rem", color: "var(--text-faint)" }}>
+              🎯 Avanza quien gane en los 90&apos; · <span style={{ color: "var(--gold)" }}>+{ADVANCE_BONUS}</span> si acertás
+            </span>
+          ))}
           {error && <span className="field-err">{error}</span>}
           {saved ? (
             <Button variant="gold" block disabled>
@@ -286,7 +295,10 @@ export function MatchCard({ match, myPrediction }: MatchCardProps) {
 function FinishedResult({ match, pred }: { match: Match; pred: Prediction }) {
   if (!match.result) return null;
   const kind = resultKind({ home: pred.home, away: pred.away }, match.result);
-  const bonus = advanceBonus(pred.advances, match.advances);
+  const bonus = advanceBonus(
+    resolveAdvancer(match.home, match.away, { home: pred.home, away: pred.away }, pred.advances),
+    match.advances,
+  );
   const pts = totalPoints({ home: pred.home, away: pred.away }, match.result, match.stage) + bonus;
   const tone = kind === "fallo" ? "bad" : "good";
   return (

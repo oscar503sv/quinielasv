@@ -39,6 +39,22 @@ export const CHAMPION_BONUS = 25;
 export const ADVANCE_BONUS = 5;
 
 /**
+ * Equipo que avanza según un marcador: el ganador del marcador; si es empate,
+ * el desempate elegido (tiempo extra/penales). Devuelve null si el empate no
+ * tiene desempate definido. Así "quién avanza" nunca contradice el marcador.
+ */
+export function resolveAdvancer(
+  home: string,
+  away: string,
+  score: Score,
+  tieBreak: string | null,
+): string | null {
+  if (score.home > score.away) return home;
+  if (score.away > score.home) return away;
+  return tieBreak;
+}
+
+/**
  * Bono de avance: se otorga si el partido ya tiene definido quién avanzó
  * (`actual`) y el jugador acertó ese equipo. En grupos `actual` es null → 0.
  */

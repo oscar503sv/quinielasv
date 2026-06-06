@@ -1,7 +1,7 @@
 import "server-only";
 
 import { getAdminDb } from "@/lib/firebase/admin";
-import { basePoints, totalPoints, advanceBonus } from "@/lib/scoring";
+import { basePoints, totalPoints, advanceBonus, resolveAdvancer } from "@/lib/scoring";
 import { STAGES, isKnockout } from "@/constants/stages";
 import {
   getMatchById,
@@ -29,13 +29,15 @@ export async function finalizeMatch(
     throw new AdminError("El partido ya está finalizado.");
   }
 
-  // En eliminatorias hay que registrar quién avanzó/ganó (define el bono).
+  // En eliminatorias el que avanza se deriva del marcador; solo si el resultado
+  // oficial es empate (se definió por tiempo extra/penales) hay que indicarlo.
   let advanced: string | null = null;
   if (isKnockout(match.stage)) {
-    if (advances !== match.home && advances !== match.away) {
-      throw new AdminError("Indicá qué equipo avanza/gana la llave.");
+    const draw = result.home === result.away;
+    if (draw && advances !== match.home && advances !== match.away) {
+      throw new AdminError("Empate en los 90': indicá qué equipo avanza (penales).");
     }
-    advanced = advances;
+    advanced = resolveAdvancer(match.home, match.away, result, draw ? advances : null);
   }
 
   const predictions = await getPredictionsForMatch(matchId);
@@ -45,7 +47,10 @@ export async function finalizeMatch(
 
   for (const p of predictions) {
     const pred = { home: p.home, away: p.away };
-    const bonus = advanceBonus(p.advances, advanced);
+    const bonus = advanceBonus(
+      resolveAdvancer(match.home, match.away, pred, p.advances),
+      advanced,
+    );
     batch.update(db.collection("predictions").doc(p.id), {
       basePoints: basePoints(pred, result),
       multiplier: mult,

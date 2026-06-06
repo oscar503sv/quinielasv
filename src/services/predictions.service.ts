@@ -30,17 +30,16 @@ export async function savePrediction(
       "El pronóstico ya no se puede editar: el partido está cerrado.",
     );
   }
-  // El "quién avanza" solo aplica a eliminatorias y debe ser uno de los equipos.
+  const h = clampScore(score.home);
+  const a = clampScore(score.away);
+  // El "quién avanza" solo se guarda en eliminatorias Y si el marcador es empate
+  // (con ganador, avanza el ganador → se deriva del marcador). Evita contradicciones.
   let pick: string | null = null;
-  if (isKnockout(match.stage) && advances) {
+  if (isKnockout(match.stage) && h === a && advances) {
     if (advances !== match.home && advances !== match.away) {
       throw new PredictionError("El equipo que avanza no es válido.");
     }
     pick = advances;
   }
-  await upsertPrediction(userId, match.id, {
-    home: clampScore(score.home),
-    away: clampScore(score.away),
-    advances: pick,
-  });
+  await upsertPrediction(userId, match.id, { home: h, away: a, advances: pick });
 }

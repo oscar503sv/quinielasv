@@ -1,4 +1,4 @@
-import { totalPoints, basePoints, advanceBonus, CHAMPION_BONUS } from "@/lib/scoring";
+import { totalPoints, basePoints, advanceBonus, resolveAdvancer, CHAMPION_BONUS } from "@/lib/scoring";
 import type { Match, Prediction, Standing, Tournament, User } from "@/types";
 
 /** Tasa de aciertos = pronósticos con puntos (5/3/1) sobre los hechos. */
@@ -55,7 +55,10 @@ export function computeStandings(
     const pred = { home: p.home, away: p.away };
     const base = basePoints(pred, match.result);
     row.pts += totalPoints(pred, match.result, match.stage);
-    row.pts += advanceBonus(p.advances, match.advances);
+    row.pts += advanceBonus(
+      resolveAdvancer(match.home, match.away, pred, p.advances),
+      match.advances,
+    );
     row.played += 1;
     if (base === 5) row.exact += 1;
     else if (base === 3) row.gd += 1;

@@ -22,20 +22,23 @@ function ResultCard({ match }: { match: Match }) {
   const [error, setError] = useState<string | null>(null);
 
   const knockout = isKnockout(match.stage);
+  // El que avanza se deriva del marcador; solo si es empate hay que indicarlo.
+  const isDraw = home === away;
+  const needsAdvancer = knockout && isDraw;
   const advanceLabel =
     match.stage === "final" || match.stage === "third_place"
       ? "¿Quién gana la llave?"
       : "¿Quién avanza?";
 
   async function finalize() {
-    if (knockout && !advances) {
-      setError("Indicá qué equipo avanza/gana.");
+    if (needsAdvancer && !advances) {
+      setError("Empate en los 90': indicá qué equipo avanza (penales).");
       return;
     }
     setBusy(true);
     setError(null);
     try {
-      const res = await finalizeMatch(match.id, { home, away }, knockout ? advances : null);
+      const res = await finalizeMatch(match.id, { home, away }, needsAdvancer ? advances : null);
       fireConfetti();
       // El partido pasará a `finished` y desaparecerá de esta lista (suscripción).
       void res;
@@ -64,10 +67,10 @@ function ResultCard({ match }: { match: Match }) {
         </div>
       </div>
 
-      {knockout && (
+      {needsAdvancer && (
         <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
           <span style={{ fontSize: "0.8rem", color: "var(--text-dim)" }}>
-            {advanceLabel} <span style={{ color: "var(--text-faint)" }}>(define el bono de avance)</span>
+            Empate en los 90&apos; · {advanceLabel} <span style={{ color: "var(--text-faint)" }}>(define el bono de avance)</span>
           </span>
           <div style={{ display: "flex", gap: 8 }}>
             {[match.home, match.away].map((code) => {

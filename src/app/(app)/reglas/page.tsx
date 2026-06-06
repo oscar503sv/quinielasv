@@ -229,13 +229,15 @@ export default function ReglasPage() {
               +{ADVANCE_BONUS} puntos por acertar quién avanza
             </div>
             <p style={{ color: "var(--text-dim)", margin: "4px 0 0", fontSize: "0.92rem" }}>
-              En las eliminatorias, además del marcador, elegís qué equipo pasa de ronda (o
-              gana, en la final y el 3er puesto). Si acertás, sumás +{ADVANCE_BONUS}.
+              En las eliminatorias sumás +{ADVANCE_BONUS} por acertar quién avanza (o gana,
+              en la final y el 3er puesto). Si pronosticás un{" "}
+              <strong style={{ color: "var(--text)" }}>ganador</strong>, ese es el que avanza.
+              Si pronosticás <strong style={{ color: "var(--text)" }}>empate</strong>, elegís
+              vos quién pasa (lo que se definiría por penales).
               <br />
               <strong style={{ color: "var(--text)" }}>Ojo:</strong> el marcador siempre se
-              cuenta al final de los <strong style={{ color: "var(--text)" }}>90 minutos</strong>.
-              El tiempo extra y los penales no cambian el marcador para los puntos, solo
-              definen quién avanza.
+              cuenta al final de los <strong style={{ color: "var(--text)" }}>90 minutos</strong>;
+              el tiempo extra y los penales no cambian el marcador para los puntos.
             </p>
           </div>
           <span className="display tabular" style={{ fontSize: "2.6rem", color: "var(--gold)" }}>
