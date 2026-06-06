@@ -1,0 +1,54 @@
+rules_version = '2';
+
+// Reglas de Firestore para la Quiniela Mundial 2026.
+// Las escrituras de catálogo (teams, matches, tournament) las hace el Admin SDK
+// (seed / panel admin de etapa 2), que IGNORA estas reglas. Por eso aquí el
+// cliente solo puede leerlas.
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    function signedIn() {
+      return request.auth != null;
+    }
+
+    // Catálogo: lectura para usuarios autenticados, escritura solo Admin SDK.
+    match /teams/{code} {
+      allow read: if signedIn();
+      allow write: if false;
+    }
+    match /matches/{id} {
+      allow read: if signedIn();
+      allow write: if false;
+    }
+    match /tournament/{doc} {
+      allow read: if signedIn();
+      allow write: if false;
+    }
+
+    // Perfiles: cualquiera autenticado los lee (para el ranking); cada quien
+    // solo edita el suyo.
+    match /users/{userId} {
+      allow read: if signedIn();
+      allow create, update: if signedIn() && request.auth.uid == userId;
+      allow delete: if false;
+    }
+
+    // Pronósticos: lectura para autenticados (ranking/estadísticas); cada quien
+    // solo escribe los suyos. El doc id es `${uid}_${matchId}`.
+    match /predictions/{predId} {
+      allow read: if signedIn();
+      allow create, update: if signedIn()
+        && request.resource.data.userId == request.auth.uid;
+      allow delete: if false;
+    }
+
+    // Colecciones reservadas a etapa 2 (materializadas por Admin SDK).
+    match /standings/{userId} {
+      allow read: if signedIn();
+      allow write: if false;
+    }
+    match /audit_logs/{id} {
+      allow read, write: if false;
+    }
+  }
+}

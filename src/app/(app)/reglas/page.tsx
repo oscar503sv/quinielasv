@@ -1,0 +1,212 @@
+import type { ReactNode } from "react";
+import { Card } from "@/components/ui/Card";
+import { Pill } from "@/components/ui/Pill";
+import { STAGES } from "@/constants/stages";
+import { CHAMPION_BONUS } from "@/lib/scoring";
+import type { MatchStage } from "@/types";
+
+export const metadata = { title: "Cómo se juega · Quiniela 2026" };
+
+interface Tier {
+  pts: number;
+  title: string;
+  desc: string;
+  color: string;
+  pred: string;
+  res: string;
+}
+
+const TIERS: Tier[] = [
+  {
+    pts: 5,
+    title: "Marcador exacto",
+    desc: "Clavaste el resultado tal cual: goles del local y del visitante.",
+    color: "var(--gold)",
+    pred: "2–1",
+    res: "2–1",
+  },
+  {
+    pts: 3,
+    title: "Diferencia exacta",
+    desc: "Acertaste quién gana y por cuántos goles, pero no el marcador justo.",
+    color: "var(--good)",
+    pred: "2–1",
+    res: "3–2",
+  },
+  {
+    pts: 1,
+    title: "Tendencia",
+    desc: "Acertaste sólo quién gana (o el empate), no la diferencia.",
+    color: "var(--blue)",
+    pred: "2–0",
+    res: "1–0",
+  },
+  {
+    pts: 0,
+    title: "Fallo",
+    desc: "Otro resultado. Tranquilo, viene la revancha el próximo partido.",
+    color: "var(--bad)",
+    pred: "1–2",
+    res: "2–0",
+  },
+];
+
+const MULT_GROUPS: { mult: number; stages: MatchStage[] }[] = [
+  { mult: 1, stages: [] },
+  { mult: 2, stages: [] },
+  { mult: 3, stages: [] },
+];
+(Object.keys(STAGES) as MatchStage[]).forEach((s) => {
+  const g = MULT_GROUPS.find((m) => m.mult === STAGES[s].mult);
+  g?.stages.push(s);
+});
+
+function MiniScore({ label, value, color }: { label: string; value: string; color?: string }) {
+  return (
+    <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 2 }}>
+      <span style={{ fontSize: "0.66rem", textTransform: "uppercase", letterSpacing: "0.08em", color: "var(--text-faint)" }}>
+        {label}
+      </span>
+      <span className="display tabular" style={{ fontSize: "1.4rem", color: color ?? "var(--text)" }}>
+        {value}
+      </span>
+    </div>
+  );
+}
+
+function Section({ title, eyebrow, children }: { title: string; eyebrow?: string; children: ReactNode }) {
+  return (
+    <section style={{ display: "flex", flexDirection: "column", gap: 14 }}>
+      {eyebrow && <span className="eyebrow">{eyebrow}</span>}
+      <h2 style={{ fontSize: "1.3rem", margin: 0 }}>{title}</h2>
+      {children}
+    </section>
+  );
+}
+
+export default function ReglasPage() {
+  return (
+    <div className="fade-up" style={{ display: "flex", flexDirection: "column", gap: 32, maxWidth: 920 }}>
+      {/* Encabezado */}
+      <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+        <span className="eyebrow">Cómo sumás puntos</span>
+        <h1 style={{ fontSize: "2.2rem", margin: 0 }}>El sistema de puntaje 🎯</h1>
+        <p style={{ color: "var(--text-dim)", fontSize: "1.05rem", maxWidth: 620 }}>
+          Pronosticá el marcador de cada partido. Mientras más cerca quedes del
+          resultado real, más puntos sumás. Y cuanto más avanza el Mundial, más
+          valen. Acá te lo explicamos de una.
+        </p>
+      </div>
+
+      {/* Puntos base */}
+      <Section eyebrow="Paso 1" title="Puntos base por partido">
+        <div className="stat-grid-4">
+          {TIERS.map((t) => (
+            <Card key={t.pts} style={{ padding: 18, display: "flex", flexDirection: "column", gap: 12, borderColor: "var(--border)" }}>
+              <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+                <span className="display" style={{ fontSize: "2.6rem", lineHeight: 1, color: t.color }}>
+                  {t.pts}
+                </span>
+                <Pill style={{ borderColor: t.color, color: t.color, background: "transparent" }}>
+                  {t.pts === 1 ? "punto" : "puntos"}
+                </Pill>
+              </div>
+              <div>
+                <div style={{ fontWeight: 700 }}>{t.title}</div>
+                <p style={{ color: "var(--text-dim)", fontSize: "0.86rem", margin: "4px 0 0" }}>{t.desc}</p>
+              </div>
+              <div
+                style={{
+                  marginTop: "auto",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  gap: 18,
+                  padding: "10px 0 2px",
+                  borderTop: "1px solid var(--border)",
+                }}
+              >
+                <MiniScore label="Pronóstico" value={t.pred} color={t.color} />
+                <span style={{ color: "var(--text-faint)", fontWeight: 700 }}>vs</span>
+                <MiniScore label="Resultado" value={t.res} />
+              </div>
+            </Card>
+          ))}
+        </div>
+      </Section>
+
+      {/* Multiplicadores */}
+      <Section eyebrow="Paso 2" title="Multiplicadores por fase">
+        <p style={{ color: "var(--text-dim)", marginTop: -4 }}>
+          Tus puntos base se multiplican según la fase del partido. Una final pesa
+          el triple que un partido de grupos.
+        </p>
+        <div className="stat-grid">
+          {MULT_GROUPS.map((g) => (
+            <Card key={g.mult} style={{ padding: 20, display: "flex", flexDirection: "column", gap: 12 }}>
+              <div style={{ display: "flex", alignItems: "baseline", gap: 8 }}>
+                <span className="display" style={{ fontSize: "2.2rem", color: "var(--gold)" }}>×{g.mult}</span>
+                <span style={{ color: "var(--text-dim)", fontSize: "0.86rem" }}>
+                  {g.mult === 1 ? "valor normal" : g.mult === 2 ? "doble" : "triple"}
+                </span>
+              </div>
+              <div style={{ display: "flex", flexWrap: "wrap", gap: 6 }}>
+                {g.stages.map((s) => (
+                  <Pill key={s} tone="gold">{STAGES[s].label}</Pill>
+                ))}
+              </div>
+            </Card>
+          ))}
+        </div>
+      </Section>
+
+      {/* Bono campeón */}
+      <Section eyebrow="Paso 3" title="Bono campeón">
+        <Card
+          style={{
+            padding: 24,
+            display: "flex",
+            alignItems: "center",
+            gap: 20,
+            flexWrap: "wrap",
+            background: "var(--gold-soft)",
+            borderColor: "var(--gold-border)",
+          }}
+        >
+          <span style={{ fontSize: "2.8rem" }}>🏆</span>
+          <div style={{ flex: 1, minWidth: 220 }}>
+            <div style={{ fontWeight: 700, fontSize: "1.05rem" }}>
+              +{CHAMPION_BONUS} puntos si acertás el campeón
+            </div>
+            <p style={{ color: "var(--text-dim)", margin: "4px 0 0", fontSize: "0.92rem" }}>
+              Elegí quién creés que va a levantar la copa. Si acertás, se te suman al
+              final del torneo. Es independiente de tu equipo del corazón.
+            </p>
+          </div>
+          <span className="display tabular" style={{ fontSize: "2.6rem", color: "var(--gold)" }}>
+            +{CHAMPION_BONUS}
+          </span>
+        </Card>
+      </Section>
+
+      {/* Ejemplo */}
+      <Section eyebrow="En la práctica" title="Un ejemplo rápido">
+        <Card style={{ padding: 22, display: "flex", flexDirection: "column", gap: 14 }}>
+          <p style={{ margin: 0, color: "var(--text-dim)" }}>
+            Pronosticaste <strong style={{ color: "var(--text)" }}>2–1</strong> en una{" "}
+            <strong style={{ color: "var(--text)" }}>semifinal</strong> y el partido terminó{" "}
+            <strong style={{ color: "var(--text)" }}>2–1</strong>:
+          </p>
+          <div style={{ display: "flex", alignItems: "center", gap: 12, flexWrap: "wrap" }}>
+            <Pill tone="gold">Marcador exacto</Pill>
+            <span className="tabular" style={{ color: "var(--text-dim)" }}>5 base</span>
+            <span style={{ color: "var(--text-faint)" }}>×</span>
+            <Pill tone="gold">Semifinal ×3</Pill>
+            <span style={{ color: "var(--text-faint)" }}>=</span>
+            <span className="display tabular" style={{ fontSize: "1.8rem", color: "var(--good)" }}>15 puntos 🔥</span>
+          </div>
+        </Card>
+      </Section>
+    </div>
+  );
+}
