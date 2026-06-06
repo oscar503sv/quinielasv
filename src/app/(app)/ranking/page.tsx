@@ -115,14 +115,20 @@ export default function RankingPage() {
 
           {/* Tabla */}
           <Card style={{ padding: 0, overflow: "hidden" }}>
-            <table style={{ width: "100%", borderCollapse: "collapse" }}>
+            <table className="rank-table" style={{ width: "100%", borderCollapse: "collapse" }}>
               <thead>
-                <tr style={{ textAlign: "left", color: "var(--text-dim)", fontSize: "0.78rem", textTransform: "uppercase", letterSpacing: "0.06em" }}>
-                  <th style={{ padding: "12px 14px" }}>#</th>
-                  <th style={{ padding: "12px 14px" }}>Jugador</th>
-                  <th style={{ padding: "12px 14px", textAlign: "right" }}>Puntos</th>
-                  <th style={{ padding: "12px 14px", textAlign: "right" }}>Exactos</th>
-                  <th style={{ padding: "12px 14px", textAlign: "right" }}>Tendencias</th>
+                <tr>
+                  <th>#</th>
+                  <th>Jugador</th>
+                  <th style={{ textAlign: "right" }}>
+                    <span className="col-full">Puntos</span><span className="col-abbr">Pts</span>
+                  </th>
+                  <th style={{ textAlign: "right" }}>
+                    <span className="col-full">Exactos</span><span className="col-abbr">Exac.</span>
+                  </th>
+                  <th style={{ textAlign: "right" }}>
+                    <span className="col-full">Tendencias</span><span className="col-abbr">Tend.</span>
+                  </th>
                 </tr>
               </thead>
               <tbody>
@@ -134,10 +140,10 @@ export default function RankingPage() {
                       background: s.me ? "var(--gold-soft)" : "transparent",
                     }}
                   >
-                    <td className="tabular" style={{ padding: "11px 14px", fontWeight: 700, color: "var(--text-dim)" }}>
+                    <td className="tabular" style={{ fontWeight: 700, color: "var(--text-dim)" }}>
                       {safePage * PER_PAGE + i + 1}
                     </td>
-                    <td style={{ padding: "11px 14px" }}>
+                    <td>
                       <span style={{ display: "inline-flex", alignItems: "center", gap: 9 }}>
                         <Flag code={s.support} w={26} h={18} r={4} />
                         <span style={{ fontWeight: 600 }}>{s.name}</span>
@@ -147,9 +153,9 @@ export default function RankingPage() {
                         )}
                       </span>
                     </td>
-                    <td className="display tabular" style={{ padding: "11px 14px", textAlign: "right" }}>{s.pts}</td>
-                    <td className="tabular" style={{ padding: "11px 14px", textAlign: "right" }}>{s.exact}</td>
-                    <td className="tabular" style={{ padding: "11px 14px", textAlign: "right" }}>{s.trend}</td>
+                    <td className="display tabular" style={{ textAlign: "right" }}>{s.pts}</td>
+                    <td className="tabular" style={{ textAlign: "right" }}>{s.exact}</td>
+                    <td className="tabular" style={{ textAlign: "right" }}>{s.trend}</td>
                   </tr>
                 ))}
               </tbody>

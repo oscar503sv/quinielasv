@@ -431,6 +431,22 @@ a {
   background: var(--gold-soft);
 }
 
+/* ---- Tabla de ranking ---- */
+.rank-table th,
+.rank-table td {
+  padding: 11px 14px;
+}
+.rank-table thead tr {
+  text-align: left;
+  color: var(--text-dim);
+  font-size: 0.78rem;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+.rank-table .col-abbr {
+  display: none;
+}
+
 /* ---- Avatar ---- */
 .avatar {
   border-radius: 50%;
@@ -531,6 +547,20 @@ a {
   }
   .tab {
     text-align: center;
+  }
+  .rank-table th,
+  .rank-table td {
+    padding: 9px 7px;
+  }
+  .rank-table thead tr {
+    font-size: 0.66rem;
+    letter-spacing: 0.01em;
+  }
+  .rank-table .col-full {
+    display: none;
+  }
+  .rank-table .col-abbr {
+    display: inline;
   }
 }
 
