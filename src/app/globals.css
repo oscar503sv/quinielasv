@@ -525,11 +525,11 @@ a {
     grid-template-columns: 1fr;
   }
   .tabs {
-    display: flex;
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
     width: 100%;
   }
   .tab {
-    flex: 1 1 auto;
     text-align: center;
   }
 }
