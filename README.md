@@ -51,7 +51,8 @@ npm run dev    # http://localhost:3000
 | `npm run dev` | Servidor de desarrollo (Turbopack). |
 | `npm run build` | Build de producción. |
 | `npm run lint` | ESLint (flat config). |
-| `npm run seed` | Carga datos de ejemplo en Firestore (Admin SDK). |
+| `npm run seed` | Limpia y reescribe `teams`/`matches` en Firestore (idempotente). No toca cuentas de usuario. |
+| `npm run seed:reset` | Como `seed` pero además vacía `predictions` y `audit_logs` (datos de prueba). |
 
 ## Arquitectura
 

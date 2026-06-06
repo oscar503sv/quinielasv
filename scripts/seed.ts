@@ -204,11 +204,33 @@ const KNOCKOUT_MATCHES: Match[] = KNOCKOUT.map(([stage, day], i) => {
 
 const MATCHES: Match[] = [...GROUP_MATCHES, ...KNOCKOUT_MATCHES];
 
+/** Borra todos los docs de una colección (en lotes de 400). */
+async function clearCollection(
+  db: FirebaseFirestore.Firestore,
+  name: string,
+): Promise<number> {
+  const col = db.collection(name);
+  let removed = 0;
+  for (;;) {
+    const snap = await col.limit(400).get();
+    if (snap.empty) break;
+    const batch = db.batch();
+    snap.docs.forEach((d) => batch.delete(d.ref));
+    await batch.commit();
+    removed += snap.size;
+    if (snap.size < 400) break;
+  }
+  return removed;
+}
+
 async function main() {
   initAdmin();
   const db = getFirestore();
+  const reset = process.argv.includes("--reset");
 
-  // Teams
+  // Teams — borrar lo viejo y reescribir (idempotente, sin docs sueltos).
+  const oldTeams = await clearCollection(db, "teams");
+  if (oldTeams) console.log(`🧹 ${oldTeams} equipos viejos eliminados`);
   const teamsBatch = db.batch();
   for (const t of TEAMS) {
     teamsBatch.set(db.collection("teams").doc(t.code), t);
@@ -216,7 +238,9 @@ async function main() {
   await teamsBatch.commit();
   console.log(`✓ ${TEAMS.length} equipos`);
 
-  // Matches
+  // Matches — idem.
+  const oldMatches = await clearCollection(db, "matches");
+  if (oldMatches) console.log(`🧹 ${oldMatches} partidos viejos eliminados`);
   const matchBatch = db.batch();
   for (const m of MATCHES) {
     const { id, ...rest } = m;
@@ -224,6 +248,13 @@ async function main() {
   }
   await matchBatch.commit();
   console.log(`✓ ${MATCHES.length} partidos`);
+
+  // Datos de prueba (solo con --reset): pronósticos y auditoría.
+  if (reset) {
+    const p = await clearCollection(db, "predictions");
+    const a = await clearCollection(db, "audit_logs");
+    console.log(`🧹 reset: ${p} pronósticos y ${a} logs eliminados`);
+  }
 
   // Tournament — el cierre para elegir campeón es 5 min antes del partido
   // inaugural (jue 11 jun 2026, 12:55 America/El_Salvador = UTC-6).
