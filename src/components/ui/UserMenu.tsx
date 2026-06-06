@@ -131,7 +131,6 @@ export function UserMenu() {
               gap: 9,
               textAlign: "left",
               border: "none",
-              background: "transparent",
               cursor: "pointer",
               color: "var(--bad)",
             }}

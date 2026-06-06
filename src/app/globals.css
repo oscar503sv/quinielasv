@@ -391,6 +391,7 @@ a {
   font-size: 0.9rem;
   font-weight: 600;
   color: var(--text-dim);
+  background: transparent;
   transition: background 0.18s ease, color 0.18s ease;
 }
 .nav-link:hover {
