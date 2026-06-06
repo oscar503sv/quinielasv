@@ -7,32 +7,46 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { Card } from "@/components/ui/Card";
 import { Button } from "@/components/ui/Button";
 import { GoogleIcon } from "@/components/ui/GoogleIcon";
+import { PasswordField } from "@/components/ui/PasswordField";
 import { fireConfetti } from "@/lib/confetti";
 import {
   authErrorMessage,
   loginWithEmail,
   loginWithGoogle,
   registerWithEmail,
+  resetPassword,
 } from "./auth-client";
 import {
   loginSchema,
+  recoverSchema,
   registerSchema,
   type LoginValues,
+  type RecoverValues,
   type RegisterValues,
 } from "./schemas";
 
-type Mode = "login" | "register";
+type Mode = "login" | "register" | "recover";
 
 export function AuthCard() {
   const router = useRouter();
   const [mode, setMode] = useState<Mode>("login");
   const [formError, setFormError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
+  const [recoverSent, setRecoverSent] = useState(false);
 
   const login = useForm<LoginValues>({ resolver: zodResolver(loginSchema) });
   const register = useForm<RegisterValues>({
     resolver: zodResolver(registerSchema),
   });
+  const recover = useForm<RecoverValues>({
+    resolver: zodResolver(recoverSchema),
+  });
+
+  function goMode(m: Mode) {
+    setFormError(null);
+    setRecoverSent(false);
+    setMode(m);
+  }
 
   async function onSuccess() {
     fireConfetti();
@@ -79,6 +93,81 @@ export function AuthCard() {
     }
   }
 
+  async function handleRecover(values: RecoverValues) {
+    setFormError(null);
+    setBusy(true);
+    try {
+      await resetPassword(values.email);
+      setRecoverSent(true);
+    } catch (err) {
+      setFormError(authErrorMessage(err));
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  if (mode === "recover") {
+    return (
+      <Card style={{ padding: 26, width: "100%", maxWidth: 420 }}>
+        <h2 style={{ margin: "0 0 6px", fontSize: "1.2rem" }}>Recuperar contraseña</h2>
+        <p style={{ color: "var(--text-dim)", fontSize: "0.9rem", margin: "0 0 18px" }}>
+          Ingresá tu correo y te enviamos un enlace para restablecerla.
+        </p>
+
+        {recoverSent ? (
+          <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
+            <div
+              className="card"
+              style={{
+                padding: 14,
+                background: "var(--gold-soft)",
+                borderColor: "var(--gold-border)",
+                fontSize: "0.9rem",
+              }}
+            >
+              📧 Si el correo está registrado, te enviamos un enlace para
+              restablecer tu contraseña. Revisá tu bandeja (y el spam).
+            </div>
+            <Button type="button" variant="outline" block onClick={() => goMode("login")}>
+              ← Volver a iniciar sesión
+            </Button>
+          </div>
+        ) : (
+          <form
+            onSubmit={recover.handleSubmit(handleRecover)}
+            style={{ display: "flex", flexDirection: "column", gap: 14 }}
+          >
+            <div className="field">
+              <label htmlFor="recover-email">Correo</label>
+              <input
+                id="recover-email"
+                type="email"
+                className="input"
+                placeholder="tu@correo.com"
+                autoComplete="email"
+                {...recover.register("email")}
+              />
+              {recover.formState.errors.email && (
+                <span className="field-err">{recover.formState.errors.email.message}</span>
+              )}
+            </div>
+            {formError && <span className="field-err">{formError}</span>}
+            <Button type="submit" block disabled={busy}>
+              {busy ? "Enviando…" : "Enviar enlace de recuperación"}
+            </Button>
+            <button
+              type="button"
+              className="btn btn-ghost"
+              onClick={() => goMode("login")}
+            >
+              ← Volver a iniciar sesión
+            </button>
+          </form>
+        )}
+      </Card>
+    );
+  }
+
   return (
     <Card style={{ padding: 26, width: "100%", maxWidth: 420 }}>
       <div className="tabs" style={{ width: "100%", marginBottom: 20 }}>
@@ -87,7 +176,7 @@ export function AuthCard() {
           className="tab"
           data-active={mode === "login"}
           style={{ flex: 1 }}
-          onClick={() => setMode("login")}
+          onClick={() => goMode("login")}
         >
           Iniciar sesión
         </button>
@@ -96,7 +185,7 @@ export function AuthCard() {
           className="tab"
           data-active={mode === "register"}
           style={{ flex: 1 }}
-          onClick={() => setMode("register")}
+          onClick={() => goMode("register")}
         >
           Crear cuenta
         </button>
@@ -151,10 +240,8 @@ export function AuthCard() {
           </div>
           <div className="field">
             <label htmlFor="login-password">Contraseña</label>
-            <input
+            <PasswordField
               id="login-password"
-              type="password"
-              className="input"
               placeholder="••••••••"
               autoComplete="current-password"
               {...login.register("password")}
@@ -166,6 +253,22 @@ export function AuthCard() {
             )}
           </div>
           {formError && <span className="field-err">{formError}</span>}
+          <button
+            type="button"
+            onClick={() => goMode("recover")}
+            style={{
+              alignSelf: "flex-start",
+              background: "transparent",
+              border: "none",
+              cursor: "pointer",
+              color: "var(--gold)",
+              fontSize: "0.84rem",
+              fontWeight: 600,
+              padding: 0,
+            }}
+          >
+            ¿Olvidaste tu contraseña?
+          </button>
           <Button type="submit" block disabled={busy}>
             {busy ? "Entrando…" : "Iniciar sesión"}
           </Button>
@@ -209,10 +312,8 @@ export function AuthCard() {
           </div>
           <div className="field">
             <label htmlFor="reg-password">Contraseña</label>
-            <input
+            <PasswordField
               id="reg-password"
-              type="password"
-              className="input"
               placeholder="Mínimo 6 caracteres"
               autoComplete="new-password"
               {...register.register("password")}
@@ -225,10 +326,8 @@ export function AuthCard() {
           </div>
           <div className="field">
             <label htmlFor="reg-confirm">Confirmar contraseña</label>
-            <input
+            <PasswordField
               id="reg-confirm"
-              type="password"
-              className="input"
               placeholder="Repetí la contraseña"
               autoComplete="new-password"
               {...register.register("confirm")}

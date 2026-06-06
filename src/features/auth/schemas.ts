@@ -17,5 +17,10 @@ export const registerSchema = z
     path: ["confirm"],
   });
 
+export const recoverSchema = z.object({
+  email: z.string().email("Ingresá un correo válido"),
+});
+
 export type LoginValues = z.infer<typeof loginSchema>;
 export type RegisterValues = z.infer<typeof registerSchema>;
+export type RecoverValues = z.infer<typeof recoverSchema>;

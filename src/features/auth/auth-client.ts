@@ -1,5 +1,6 @@
 import {
   createUserWithEmailAndPassword,
+  sendPasswordResetEmail,
   signInWithEmailAndPassword,
   signInWithPopup,
   signOut,
@@ -47,6 +48,11 @@ export async function loginWithGoogle(): Promise<void> {
   await establishSession(cred.user);
 }
 
+/** Envía el correo para restablecer la contraseña. */
+export async function resetPassword(email: string): Promise<void> {
+  await sendPasswordResetEmail(auth, email);
+}
+
 /** Cierra sesión en el cliente y borra la session cookie. */
 export async function logout(): Promise<void> {
   await signOut(auth);
@@ -66,6 +72,8 @@ export function authErrorMessage(err: unknown): string {
       return "Correo o contraseña incorrectos.";
     case "auth/email-already-in-use":
       return "Ese correo ya está registrado.";
+    case "auth/invalid-email":
+      return "Ingresá un correo válido.";
     case "auth/weak-password":
       return "La contraseña es muy débil.";
     case "auth/popup-closed-by-user":
