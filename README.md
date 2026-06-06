@@ -1,10 +1,10 @@
 # Quiniela Mundial 2026
 
 Aplicación web para una quiniela del Mundial FIFA 2026 entre amigos y familia.
-Cada jugador pronostica los marcadores (fase de grupos y eliminatorias), suma
-puntos según su acierto y la fase, elige un **campeón** (bono) y un **equipo del
-corazón** (su bandera es el avatar). Hay ranking, estadísticas, perfil y un panel
-de administración.
+Cada jugador pronostica los marcadores (fase de grupos y eliminatorias), suma puntos
+según su acierto y la fase, gana bonos por acertar el **campeón** y —en eliminatorias—
+**quién avanza**, y elige un **equipo del corazón** (su bandera es el avatar). Hay
+ranking, estadísticas, perfil y un panel de administración.
 
 **Stack:** Next.js 16 (App Router, Turbopack) · React 19 · TypeScript · Tailwind v4 ·
 Firebase Auth + Firestore (Client + Admin SDK) · TanStack Query · React Hook Form · Zod.
@@ -23,11 +23,13 @@ Firebase Auth + Firestore (Client + Admin SDK) · TanStack Query · React Hook F
   penales solo definen quién pasa, no el marcador, que se cuenta a los 90').
 - **Campeón** (+25): elegible/editable hasta el cierre configurable (`championLockAt`),
   validado server-side. Independiente del equipo del corazón.
-- **Ranking** (podio + tabla paginada, con bono campeón) y **estadísticas**. Desempate:
+- **Ranking** (podio + tabla paginada, con bonos) y **estadísticas**. Desempate:
   puntos → más exactos → más diferencias exactas → mejor % de aciertos → alfabético.
+- **Cómo se juega** (`/reglas`): explica el puntaje base, los multiplicadores, los bonos
+  de campeón y de avance, y los criterios de desempate, con ejemplos.
 - **Panel admin** (`/admin`): partidos (ABM con filtros y paginación), resultados
-  (finalización + cálculo de puntos), y torneo (iniciar / congelar pronósticos /
-  finalizar / campeón oficial / deadline).
+  (finalización + cálculo de puntos, incluido quién avanza en eliminatorias), y torneo
+  (iniciar / congelar pronósticos / finalizar / campeón oficial / deadline).
 
 ## Puesta en marcha
 
@@ -85,8 +87,10 @@ npm run dev    # http://localhost:3000
 `UI → services → repositories → Firestore`. Server Components por defecto; el gating
 de rutas vive en `src/app/(app)/layout.tsx` y `src/app/admin/layout.tsx` (verifican la
 session cookie con el Admin SDK; admin = `ADMIN_EMAILS`). El cálculo de puntos
-(`src/lib/scoring.ts`) y el ranking (`src/services/standings.service.ts`, incluye el
-bono campeón) son puros y se calculan on-the-fly.
+(`src/lib/scoring.ts`) y el ranking (`src/services/standings.service.ts`, incluye los
+bonos de campeón y de avance) son puros y se calculan on-the-fly. El marcador se puntúa a
+los 90'; en eliminatorias, `Match.advances`/`Prediction.advances` y `resolveAdvancer()`
+resuelven quién avanza (ganador del marcador o, si es empate, el desempate por penales).
 
 **Mutaciones sensibles** (finalizar partidos, ABM de partidos, torneo, definir campeón
 del jugador) pasan por route handlers `/api/admin/*` y `/api/champion` con el **Admin
@@ -96,4 +100,4 @@ se lee reactivamente vía `tournament/config` y afecta la UI en vivo.
 
 ---
 
-Hecho con 💙 por **Oscar Aragón**.
+Hecho desde 🇸🇻 por **Oscar**.
