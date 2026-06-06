@@ -157,28 +157,76 @@ export function MatchCard({ match, myPrediction }: MatchCardProps) {
         </>
       )}
 
-      {/* ---- Estado: locked ---- */}
-      {(match.status === "locked" || (match.status === "upcoming" && !open)) && (
-        <div style={{ textAlign: "center", color: "var(--text-dim)", padding: "8px 0" }}>
+      {/* ---- Estado: bloqueado (aún sin definir) ---- */}
+      {match.status === "locked" && (
+        <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
           <TeamRow code={match.home} />
-          <div style={{ fontSize: "0.78rem", color: "var(--text-faint)", margin: "8px 0" }}>VS</div>
           <TeamRow code={match.away} />
-          <p style={{ marginTop: 12, fontSize: "0.86rem" }}>
-            🔒 Este partido aún no está disponible para pronosticar.
-          </p>
+          <div style={{ display: "flex", alignItems: "center", gap: 8, marginTop: 6, color: "var(--text-dim)", fontSize: "0.84rem" }}>
+            🔒 Aún no disponible para pronosticar
+          </div>
         </div>
       )}
 
-      {/* ---- Estado: live ---- */}
-      {match.status === "live" && match.result && (
+      {/* ---- Estado: upcoming pero ya cerró el pronóstico ---- */}
+      {match.status === "upcoming" && !open && (
         <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
-          <TeamRow code={match.home} score={match.result.home} />
-          <TeamRow code={match.away} score={match.result.away} />
-          {myPrediction && (
-            <span style={{ fontSize: "0.82rem", color: "var(--text-dim)", marginTop: 4 }}>
-              Tu pronóstico: {myPrediction.home}–{myPrediction.away}
-            </span>
-          )}
+          <TeamRow code={match.home} />
+          <TeamRow code={match.away} />
+          <div
+            style={{
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "space-between",
+              gap: 8,
+              marginTop: 6,
+            }}
+          >
+            <Pill tone="dim">⏳ Cerrado</Pill>
+            {myPrediction ? (
+              <span style={{ fontSize: "0.84rem", color: "var(--text-dim)" }}>
+                Tu pronóstico:{" "}
+                <strong style={{ color: "var(--gold)" }}>
+                  {myPrediction.home}–{myPrediction.away}
+                </strong>
+              </span>
+            ) : (
+              <span style={{ fontSize: "0.84rem", color: "var(--text-faint)" }}>
+                No pronosticaste
+              </span>
+            )}
+          </div>
+        </div>
+      )}
+
+      {/* ---- Estado: live (sin marcador oficial; mostramos el pronóstico) ---- */}
+      {match.status === "live" && (
+        <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+          <TeamRow code={match.home} />
+          <TeamRow code={match.away} />
+          <div
+            style={{
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "space-between",
+              gap: 8,
+              marginTop: 6,
+            }}
+          >
+            <Pill tone="bad" live>En juego</Pill>
+            {myPrediction ? (
+              <span style={{ fontSize: "0.84rem", color: "var(--text-dim)" }}>
+                Tu pronóstico:{" "}
+                <strong style={{ color: "var(--gold)" }}>
+                  {myPrediction.home}–{myPrediction.away}
+                </strong>
+              </span>
+            ) : (
+              <span style={{ fontSize: "0.84rem", color: "var(--text-faint)" }}>
+                No pronosticaste
+              </span>
+            )}
+          </div>
         </div>
       )}
 
