@@ -3,6 +3,7 @@ import { Card } from "@/components/ui/Card";
 import { Pill } from "@/components/ui/Pill";
 import { STAGES } from "@/constants/stages";
 import { CHAMPION_BONUS } from "@/lib/scoring";
+import { ChampionDeadlineNote } from "./ChampionDeadlineNote";
 import type { MatchStage } from "@/types";
 
 export const metadata = { title: "Cómo se juega · Quiniela 2026" };
@@ -186,6 +187,18 @@ export default function ReglasPage() {
           <span className="display tabular" style={{ fontSize: "2.6rem", color: "var(--gold)" }}>
             +{CHAMPION_BONUS}
           </span>
+        </Card>
+
+        <Card style={{ padding: 20, display: "flex", flexDirection: "column", gap: 10 }}>
+          <div style={{ fontWeight: 700 }}>¿Hasta cuándo podés elegirlo?</div>
+          <p style={{ color: "var(--text-dim)", margin: 0, fontSize: "0.92rem" }}>
+            Podés elegir tu campeón —y cambiarlo las veces que quieras— hasta{" "}
+            <strong style={{ color: "var(--text)" }}>5 minutos antes del partido inaugural</strong>.
+            Cuando arranca el Mundial, tu elección queda <strong style={{ color: "var(--text)" }}>bloqueada</strong>:
+            no se puede cambiar, y quien se sume después de esa fecha ya no podrá elegir.
+            Así que no te durmás. 😉
+          </p>
+          <ChampionDeadlineNote />
         </Card>
       </Section>
 
