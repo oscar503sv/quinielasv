@@ -251,11 +251,12 @@ async function main() {
   await matchBatch.commit();
   console.log(`✓ ${MATCHES.length} partidos`);
 
-  // Datos de prueba (solo con --reset): pronósticos y auditoría.
+  // Datos de prueba (solo con --reset): pronósticos, auditoría y ligas.
   if (reset) {
     const p = await clearCollection(db, "predictions");
     const a = await clearCollection(db, "audit_logs");
-    console.log(`🧹 reset: ${p} pronósticos y ${a} logs eliminados`);
+    const l = await clearCollection(db, "leagues");
+    console.log(`🧹 reset: ${p} pronósticos, ${a} logs y ${l} ligas eliminadas`);
   }
 
   // Tournament — el cierre para elegir campeón es 5 min antes del partido
