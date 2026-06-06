@@ -6,6 +6,9 @@ import type { Match, Prediction, Standing, Tournament, User } from "@/types";
  * los pronósticos y los usuarios. Función pura (testeable y reusable).
  * Si el torneo tiene `champion` definido, suma el bono del campeón a quienes
  * lo acertaron.
+ *
+ * Desempate: puntos → más marcadores exactos → más diferencias exactas →
+ * menos fallos → orden alfabético (fallback determinista).
  */
 export function computeStandings(
   matches: Match[],
@@ -59,6 +62,7 @@ export function computeStandings(
       b.pts - a.pts ||
       b.exact - a.exact ||
       b.gd - a.gd ||
+      a.miss - b.miss ||
       a.name.localeCompare(b.name),
   );
 }

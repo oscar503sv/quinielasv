@@ -52,6 +52,14 @@ const TIERS: Tier[] = [
   },
 ];
 
+const TIEBREAKS: { title: string; desc: string }[] = [
+  { title: "Más puntos", desc: "El total acumulado en toda la quiniela." },
+  { title: "Más marcadores exactos", desc: "Quién clavó más resultados justos (5 pts)." },
+  { title: "Más diferencias exactas", desc: "Quién acertó más veces ganador y diferencia (3 pts)." },
+  { title: "Menos fallos", desc: "Quién tuvo menos pronósticos errados (0 pts)." },
+  { title: "Orden alfabético", desc: "Si todo lo anterior empata, por nombre." },
+];
+
 const MULT_GROUPS: { mult: number; stages: MatchStage[] }[] = [
   { mult: 1, stages: [] },
   { mult: 2, stages: [] },
@@ -199,6 +207,41 @@ export default function ReglasPage() {
             Así que no te durmás. 😉
           </p>
           <ChampionDeadlineNote />
+        </Card>
+      </Section>
+
+      {/* Desempate */}
+      <Section eyebrow="Paso 4" title="¿Y si hay empate?">
+        <p style={{ color: "var(--text-dim)", marginTop: -4 }}>
+          Si dos jugadores quedan con los mismos puntos, se desempata en este orden:
+        </p>
+        <Card style={{ padding: 20, display: "flex", flexDirection: "column", gap: 12 }}>
+          {TIEBREAKS.map((t, i) => (
+            <div key={t.title} style={{ display: "flex", alignItems: "center", gap: 14 }}>
+              <span
+                className="display tabular"
+                style={{
+                  width: 30,
+                  height: 30,
+                  flexShrink: 0,
+                  display: "inline-flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  borderRadius: "50%",
+                  background: "var(--gold-soft)",
+                  border: "1px solid var(--gold-border)",
+                  color: "var(--gold)",
+                  fontSize: "0.95rem",
+                }}
+              >
+                {i + 1}
+              </span>
+              <div>
+                <div style={{ fontWeight: 700 }}>{t.title}</div>
+                <p style={{ color: "var(--text-dim)", fontSize: "0.86rem", margin: "2px 0 0" }}>{t.desc}</p>
+              </div>
+            </div>
+          ))}
         </Card>
       </Section>
 

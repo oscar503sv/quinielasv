@@ -19,7 +19,8 @@ Firebase Auth + Firestore (Client + Admin SDK) · TanStack Query · React Hook F
   cierre 5 min antes de cada partido. Lista agrupada por día.
 - **Campeón** (+25): elegible/editable hasta el cierre configurable (`championLockAt`),
   validado server-side. Independiente del equipo del corazón.
-- **Ranking** (podio + tabla paginada, con bono campeón) y **estadísticas**.
+- **Ranking** (podio + tabla paginada, con bono campeón) y **estadísticas**. Desempate:
+  puntos → más exactos → más diferencias exactas → menos fallos → alfabético.
 - **Panel admin** (`/admin`): partidos (ABM con filtros y paginación), resultados
   (finalización + cálculo de puntos), y torneo (iniciar / congelar pronósticos /
   finalizar / campeón oficial / deadline).

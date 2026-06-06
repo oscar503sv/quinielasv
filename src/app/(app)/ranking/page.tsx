@@ -163,6 +163,10 @@ export default function RankingPage() {
             </table>
           </Card>
 
+          <p style={{ color: "var(--text-dim)", fontSize: "0.8rem", margin: 0 }}>
+            En caso de empate: más exactos → más diferencias exactas → menos fallos.
+          </p>
+
           {/* Paginación */}
           {pageCount > 1 && (
             <div style={{ display: "flex", alignItems: "center", gap: 12, flexWrap: "wrap" }}>
