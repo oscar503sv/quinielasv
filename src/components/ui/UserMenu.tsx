@@ -66,12 +66,15 @@ export function UserMenu() {
             position: "absolute",
             right: 0,
             top: "calc(100% + 8px)",
-            minWidth: 200,
+            minWidth: 220,
             padding: 6,
             zIndex: 40,
             display: "flex",
             flexDirection: "column",
             gap: 2,
+            // Fondo sólido (la superficie del .card es translúcida y deja ver atrás).
+            background: "var(--bg-solid)",
+            boxShadow: "0 20px 50px -16px rgba(0,0,0,.55)",
           }}
         >
           <div
