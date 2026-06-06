@@ -47,6 +47,8 @@ Las claves Web (`NEXT_PUBLIC_FIREBASE_*`) ya están cargadas. Falta el **Admin S
    - `FIREBASE_CLIENT_EMAIL` → campo `client_email`.
    - `FIREBASE_PRIVATE_KEY` → campo `private_key` (entre comillas, con los `\n` literales).
 3. `ADMIN_EMAILS` → correos con rol admin (separá varios por coma).
+4. `NEXT_PUBLIC_SITE_URL` (opcional) → dominio público para SEO (metadataBase, canonical,
+   Open Graph, sitemap). Por defecto `https://quinielasv.xyz`.
 
 ### 2. Habilitar proveedores de Auth
 

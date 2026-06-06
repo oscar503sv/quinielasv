@@ -5,6 +5,16 @@ import { AuthCard } from "@/features/auth/AuthCard";
 import { Flag } from "@/components/ui/Flag";
 import { Pill } from "@/components/ui/Pill";
 import { flagUrl } from "@/lib/utils";
+import { SITE_DESCRIPTION, SITE_NAME, SITE_URL } from "@/lib/site";
+
+const JSON_LD = {
+  "@context": "https://schema.org",
+  "@type": "WebSite",
+  name: SITE_NAME,
+  url: SITE_URL,
+  inLanguage: "es-SV",
+  description: SITE_DESCRIPTION,
+};
 
 const HERO_FLAGS = [
   "ar", "br", "fr", "gb-eng", "es", "de", "pt", "nl", "mx", "us", "uy", "co",
@@ -16,6 +26,10 @@ export default async function LandingPage() {
 
   return (
     <div className="app-bg">
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(JSON_LD) }}
+      />
       <main
         className="shell landing-grid"
         style={{ alignItems: "center", minHeight: "100vh" }}
