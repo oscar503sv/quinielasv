@@ -1,13 +1,28 @@
 # Quiniela Mundial 2026
 
 Aplicación web para una quiniela del Mundial FIFA 2026 entre amigos y familia.
-Cada jugador pronostica marcadores, suma puntos por fase, elige un campeón (bono)
-y un equipo del corazón (avatar). Hay ranking, estadísticas y perfil.
+Cada jugador pronostica los marcadores (fase de grupos y eliminatorias), suma
+puntos según su acierto y la fase, elige un **campeón** (bono) y un **equipo del
+corazón** (su bandera es el avatar). Hay ranking, estadísticas, perfil y un panel
+de administración.
 
 **Stack:** Next.js 16 (App Router, Turbopack) · React 19 · TypeScript · Tailwind v4 ·
 Firebase Auth + Firestore (Client + Admin SDK) · TanStack Query · React Hook Form · Zod.
 
 > Diseño "Estadio Nocturno" y especificación funcional en [`docs/`](./docs).
+
+## Funcionalidades
+
+- **Auth**: registro/login con correo o Google, recuperación de contraseña, sesión
+  por cookie httpOnly (Admin SDK).
+- **Pronósticos**: marcador con stepper; puntos 5/3/1/0 × multiplicador de fase;
+  cierre 5 min antes de cada partido. Lista agrupada por día.
+- **Campeón** (+10): elegible/editable hasta el cierre configurable (`championLockAt`),
+  validado server-side. Independiente del equipo del corazón.
+- **Ranking** (podio + tabla paginada, con bono campeón) y **estadísticas**.
+- **Panel admin** (`/admin`): partidos (ABM con filtros y paginación), resultados
+  (finalización + cálculo de puntos), y torneo (iniciar / congelar pronósticos /
+  finalizar / campeón oficial / deadline).
 
 ## Puesta en marcha
 
@@ -20,23 +35,29 @@ Las claves Web (`NEXT_PUBLIC_FIREBASE_*`) ya están cargadas. Falta el **Admin S
 2. Copiá del JSON al `.env`:
    - `FIREBASE_CLIENT_EMAIL` → campo `client_email`.
    - `FIREBASE_PRIVATE_KEY` → campo `private_key` (entre comillas, con los `\n` literales).
-3. `ADMIN_EMAILS` ya incluye tu correo (separá varios por coma).
+3. `ADMIN_EMAILS` → correos con rol admin (separá varios por coma).
 
 ### 2. Habilitar proveedores de Auth
 
 En Firebase Console → **Authentication** → Sign-in method, activá **Correo/Contraseña**
-y **Google**.
+y **Google**. Revisá también la plantilla de **restablecimiento de contraseña**.
 
 ### 3. Reglas de Firestore
 
 Publicá [`firestore.rules`](./firestore.rules) (Console → Firestore → Reglas, o
-`firebase deploy --only firestore:rules`).
+`firebase deploy --only firestore:rules`). Validan, del lado del servidor, que un
+pronóstico solo se escriba si es propio, el torneo no está congelado/finalizado y el
+partido sigue abierto. **Requieren que exista el doc `tournament/config`** (lo crea el
+seed). Hay que re-publicarlas cada vez que cambien.
 
-### 4. Datos de ejemplo
+### 4. Datos del torneo
 
 ```bash
-npm run seed   # puebla teams, matches demo y el doc tournament
+npm run seed   # 48 selecciones + 104 partidos (72 grupos + 32 eliminatorias) + doc tournament
 ```
+
+Las fechas/horas están en `America/El_Salvador`; las eliminatorias quedan como
+"Por definir" (editás equipos y hora en Admin → Partidos al resolverse el bracket).
 
 ### 5. Correr la app
 
@@ -57,14 +78,16 @@ npm run dev    # http://localhost:3000
 ## Arquitectura
 
 `UI → services → repositories → Firestore`. Server Components por defecto; el gating
-de rutas vive en `src/app/(app)/layout.tsx` (verifica la session cookie con el Admin
-SDK). El cálculo de puntos (`src/lib/scoring.ts`) es puro y reutilizable.
+de rutas vive en `src/app/(app)/layout.tsx` y `src/app/admin/layout.tsx` (verifican la
+session cookie con el Admin SDK; admin = `ADMIN_EMAILS`). El cálculo de puntos
+(`src/lib/scoring.ts`) y el ranking (`src/services/standings.service.ts`, incluye el
+bono campeón) son puros y se calculan on-the-fly.
 
-**Panel admin** (`/admin/*`, visible para los correos en `ADMIN_EMAILS`): gestión de
-partidos, registro de resultados (`finalize-match` calcula y persiste los puntos +
-auditoría), y gestión del torneo (estado, bloqueo de pronósticos y campeón oficial con
-bono +10). Las mutaciones pasan por route handlers `/api/admin/*` que usan el Admin SDK.
-El ranking se calcula on-the-fly (incluido el bono campeón).
+**Mutaciones sensibles** (finalizar partidos, ABM de partidos, torneo, definir campeón
+del jugador) pasan por route handlers `/api/admin/*` y `/api/champion` con el **Admin
+SDK**; las reglas de Firestore bloquean esas escrituras desde el cliente. El estado del
+torneo (`started` / `predictionsLocked` / `finished` / `champion` / `championLockAt`)
+se lee reactivamente vía `tournament/config` y afecta la UI en vivo.
 
 ---
 
