@@ -1,26 +1,513 @@
 @import "tailwindcss";
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
+/* ===========================================================================
+   Quiniela Mundial 2026 — Design System "Estadio Nocturno"
+   Tokens y componentes base. data-theme vive en <html> (oscuro por defecto).
+   =========================================================================== */
+
+/* ---- Tema oscuro (default) ---- */
+:root,
+[data-theme="dark"] {
+  --bg-grad: radial-gradient(135% 105% at 82% -12%, #16345f, #0a1830 54%, #06101f);
+  --bg-solid: #0a1830;
+  --surface: rgba(255, 255, 255, 0.055);
+  --surface-2: rgba(255, 255, 255, 0.085);
+  --border: rgba(255, 255, 255, 0.1);
+  --text: #eaf1fb;
+  --text-dim: rgba(234, 241, 251, 0.62);
+  --text-faint: rgba(234, 241, 251, 0.4);
+
+  --gold: #f2c14e;
+  --gold-2: #f7d27c;
+  --gold-soft: rgba(242, 193, 78, 0.14);
+  --gold-border: rgba(242, 193, 78, 0.36);
+  --gold-ink: #271d05;
+
+  --good: #54e08a;
+  --bad: #ff7a7a;
+  --blue: #5b95ff;
+
+  --shadow: 0 18px 50px -24px rgba(0, 0, 0, 0.6);
+  --radius: 18px;
 }
 
+/* ---- Tema claro (overrides) ---- */
+[data-theme="light"] {
+  --bg-grad: radial-gradient(135% 105% at 82% -12%, #e7efff, #f4f7fc 52%, #eaf0f9);
+  --bg-solid: #f4f7fc;
+  --surface: #ffffff;
+  --surface-2: #f5f8fd;
+  --border: #e3e9f3;
+  --text: #0f1b35;
+  --text-dim: #56607a;
+  --text-faint: rgba(15, 27, 53, 0.42);
+
+  --gold: #d99a1e;
+  --gold-2: #e7b13d;
+  --gold-soft: rgba(217, 154, 30, 0.14);
+  --gold-border: rgba(217, 154, 30, 0.4);
+  --gold-ink: #2a1f05;
+
+  --good: #15a34a;
+  --bad: #dc2626;
+  --blue: #1d4ed8;
+
+  --shadow: 0 18px 40px -28px rgba(15, 27, 53, 0.35);
+}
+
+/* ---- Acentos intercambiables (Tweak) ---- */
+[data-accent="azul"] {
+  --gold: #5b95ff;
+  --gold-2: #86b2ff;
+  --gold-soft: rgba(91, 149, 255, 0.14);
+  --gold-border: rgba(91, 149, 255, 0.36);
+  --gold-ink: #04101f;
+}
+[data-accent="esmeralda"] {
+  --gold: #41d98b;
+  --gold-2: #74e7ab;
+  --gold-soft: rgba(65, 217, 139, 0.14);
+  --gold-border: rgba(65, 217, 139, 0.36);
+  --gold-ink: #042012;
+}
+[data-accent="coral"] {
+  --gold: #ff9a66;
+  --gold-2: #ffb892;
+  --gold-soft: rgba(255, 154, 102, 0.14);
+  --gold-border: rgba(255, 154, 102, 0.36);
+  --gold-ink: #2a1205;
+}
+
+/* ---- Mapeo a Tailwind v4 ---- */
 @theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  --color-bg: var(--bg-solid);
+  --color-surface: var(--surface);
+  --color-surface-2: var(--surface-2);
+  --color-border: var(--border);
+  --color-text: var(--text);
+  --color-text-dim: var(--text-dim);
+  --color-gold: var(--gold);
+  --color-good: var(--good);
+  --color-bad: var(--bad);
+  --color-blue: var(--blue);
+  --font-display: var(--font-display);
+  --font-sans: var(--font-body);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+* {
+  box-sizing: border-box;
+}
+
+html {
+  color-scheme: dark;
+}
+[data-theme="light"] {
+  color-scheme: light;
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  /* ⚠️ NO transicionar `color` (bug de la spec §2). Solo `background`. */
+  background: var(--bg-grad);
+  background-attachment: fixed;
+  color: var(--text);
+  font-family: var(--font-body), system-ui, sans-serif;
+  font-variant-numeric: tabular-nums;
+  transition: background 0.3s ease;
+  -webkit-font-smoothing: antialiased;
+}
+
+h1, h2, h3, h4, .display {
+  font-family: var(--font-display), system-ui, sans-serif;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+}
+
+/* Para que las tarjetas-botón hereden el color del tema (spec §2). */
+button {
+  color: inherit;
+  font: inherit;
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+.tabular {
+  font-variant-numeric: tabular-nums;
+}
+
+/* ===========================================================================
+   Layout shell — sticky footer (spec §2)
+   =========================================================================== */
+.app-bg {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+}
+.topbar,
+.shell {
+  max-width: 1240px;
+  width: 100%; /* OBLIGATORIO: sin esto el contenido se comprime al centro */
+  margin: 0 auto;
+}
+.shell {
+  flex: 1 0 auto;
+  padding: 28px 20px 56px;
+}
+.topbar {
+  padding: 16px 20px;
+}
+
+/* ===========================================================================
+   Componentes base
+   =========================================================================== */
+.card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+}
+
+.eyebrow {
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--gold);
+}
+
+/* ---- Botones ---- */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 11px 18px;
+  border-radius: 12px;
+  border: 1px solid transparent;
+  font-weight: 600;
+  font-size: 0.92rem;
+  cursor: pointer;
+  transition: transform 0.12s ease, background 0.2s ease, border-color 0.2s ease,
+    opacity 0.2s ease;
+  white-space: nowrap;
+}
+.btn:active {
+  transform: translateY(1px);
+}
+.btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+.btn-gold {
+  background: linear-gradient(135deg, var(--gold-2), var(--gold));
+  color: var(--gold-ink);
+  border-color: var(--gold-border);
+}
+.btn-gold:hover:not(:disabled) {
+  filter: brightness(1.05);
+}
+.btn-outline {
+  background: transparent;
+  border-color: var(--border);
+  color: var(--text);
+}
+.btn-outline:hover:not(:disabled) {
+  background: var(--surface-2);
+}
+.btn-ghost {
+  background: transparent;
+  color: var(--text-dim);
+}
+.btn-ghost:hover:not(:disabled) {
+  background: var(--surface-2);
+  color: var(--text);
+}
+.btn-block {
+  width: 100%;
+}
+
+/* ---- Pills / badges ---- */
+.pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 11px;
+  border-radius: 999px;
+  font-size: 0.74rem;
+  font-weight: 600;
+  border: 1px solid var(--border);
+  background: var(--surface-2);
+  color: var(--text-dim);
+}
+.pill-gold {
+  background: var(--gold-soft);
+  border-color: var(--gold-border);
+  color: var(--gold);
+}
+.pill-blue {
+  background: rgba(91, 149, 255, 0.14);
+  border-color: rgba(91, 149, 255, 0.36);
+  color: var(--blue);
+}
+.pill-good {
+  background: rgba(84, 224, 138, 0.14);
+  border-color: rgba(84, 224, 138, 0.36);
+  color: var(--good);
+}
+.pill-bad {
+  background: rgba(255, 122, 122, 0.14);
+  border-color: rgba(255, 122, 122, 0.36);
+  color: var(--bad);
+}
+.pill-dim {
+  color: var(--text-faint);
+}
+.badge-mult {
+  display: inline-flex;
+  align-items: center;
+  padding: 2px 8px;
+  border-radius: 7px;
+  font-size: 0.72rem;
+  font-weight: 800;
+  background: var(--gold-soft);
+  color: var(--gold);
+  border: 1px solid var(--gold-border);
+}
+.pill-live {
+  animation: pulse 1.4s ease-in-out infinite;
+}
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.45; }
+}
+
+/* ---- Inputs ---- */
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.field > label {
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: var(--text-dim);
+}
+.input {
+  width: 100%;
+  padding: 11px 13px;
+  border-radius: 11px;
+  border: 1px solid var(--border);
+  background: var(--surface-2);
+  color: var(--text);
+  font-size: 0.94rem;
+  outline: none;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+.input:focus {
+  border-color: var(--gold-border);
+  box-shadow: 0 0 0 3px var(--gold-soft);
+}
+.input:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+.field-err {
+  font-size: 0.78rem;
+  color: var(--bad);
+}
+
+/* ---- Stepper de marcador ---- */
+.score-box {
+  min-width: 64px;
+  text-align: center;
+  font-family: var(--font-display), system-ui, sans-serif;
+  font-size: 2.1rem;
+  font-weight: 800;
+  font-variant-numeric: tabular-nums;
+  line-height: 1;
+}
+.score-box.saved {
+  color: var(--gold);
+}
+.step-btn {
+  width: 38px;
+  height: 38px;
+  border-radius: 11px;
+  border: 1px solid var(--border);
+  background: var(--surface-2);
+  color: var(--text);
+  font-size: 1.2rem;
+  font-weight: 700;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.18s ease, transform 0.12s ease;
+}
+.step-btn:hover:not(:disabled) {
+  background: var(--gold-soft);
+  border-color: var(--gold-border);
+}
+.step-btn:active:not(:disabled) {
+  transform: scale(0.94);
+}
+.step-btn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+/* ---- Tabs ---- */
+.tabs {
+  display: inline-flex;
+  gap: 4px;
+  padding: 4px;
+  border-radius: 13px;
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  flex-wrap: wrap;
+}
+.tab {
+  padding: 8px 15px;
+  border-radius: 9px;
+  font-size: 0.86rem;
+  font-weight: 600;
+  color: var(--text-dim);
+  cursor: pointer;
+  border: none;
+  background: transparent;
+  transition: background 0.18s ease, color 0.18s ease;
+}
+.tab[data-active="true"] {
+  background: var(--gold-soft);
+  color: var(--gold);
+}
+
+/* ---- Nav / topbar ---- */
+.nav-link {
+  padding: 8px 12px;
+  border-radius: 9px;
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: var(--text-dim);
+  transition: background 0.18s ease, color 0.18s ease;
+}
+.nav-link:hover {
+  color: var(--text);
+  background: var(--surface-2);
+}
+.nav-link[data-active="true"] {
+  color: var(--gold);
+  background: var(--gold-soft);
+}
+.icon-btn {
+  width: 40px;
+  height: 40px;
+  border-radius: 11px;
+  border: 1px solid var(--border);
+  background: var(--surface-2);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  font-size: 1.1rem;
+  transition: background 0.18s ease;
+}
+.icon-btn:hover {
+  background: var(--gold-soft);
+}
+
+/* ---- Avatar ---- */
+.avatar {
+  border-radius: 50%;
+  overflow: hidden;
+  object-fit: cover;
+  box-shadow: 0 0 0 1px var(--border);
+}
+
+/* ===========================================================================
+   Animaciones
+   =========================================================================== */
+@keyframes fadeUp {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+.fade-up > * {
+  animation: fadeUp 0.5s ease both;
+}
+.fade-up > *:nth-child(1) { animation-delay: 0.02s; }
+.fade-up > *:nth-child(2) { animation-delay: 0.07s; }
+.fade-up > *:nth-child(3) { animation-delay: 0.12s; }
+.fade-up > *:nth-child(4) { animation-delay: 0.17s; }
+.fade-up > *:nth-child(5) { animation-delay: 0.22s; }
+.fade-up > *:nth-child(6) { animation-delay: 0.27s; }
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  .fade-up > * {
+    animation: none !important;
+    transition: none !important;
+  }
+}
+
+/* ===========================================================================
+   Grids responsivos
+   =========================================================================== */
+.landing-grid {
+  display: grid;
+  grid-template-columns: 1.1fr 0.9fr;
+  gap: 48px;
+}
+.stat-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 16px;
+}
+.stat-grid-4 {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 16px;
+}
+.match-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+  gap: 18px;
+}
+.team-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+  gap: 12px;
+}
+.section-grid {
+  display: grid;
+  grid-template-columns: 1.4fr 1fr;
+  gap: 22px;
+  align-items: start;
+}
+
+@media (max-width: 900px) {
+  .landing-grid,
+  .section-grid {
+    grid-template-columns: 1fr;
+  }
+  .stat-grid,
+  .stat-grid-4 {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+@media (max-width: 560px) {
+  .stat-grid,
+  .stat-grid-4 {
+    grid-template-columns: 1fr;
+  }
+  .match-grid {
+    grid-template-columns: 1fr;
+  }
 }
