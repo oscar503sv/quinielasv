@@ -16,8 +16,8 @@ export async function POST(request: Request) {
   }
 
   try {
-    const { matchId, home, away } = parsed.data;
-    const res = await finalizeMatch(matchId, { home, away }, admin.uid);
+    const { matchId, home, away, advances } = parsed.data;
+    const res = await finalizeMatch(matchId, { home, away }, admin.uid, advances ?? null);
     return NextResponse.json({ ok: true, ...res });
   } catch (err) {
     if (err instanceof AdminError) {

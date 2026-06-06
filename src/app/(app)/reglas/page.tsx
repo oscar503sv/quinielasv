@@ -2,7 +2,7 @@ import type { ReactNode } from "react";
 import { Card } from "@/components/ui/Card";
 import { Pill } from "@/components/ui/Pill";
 import { STAGES } from "@/constants/stages";
-import { CHAMPION_BONUS } from "@/lib/scoring";
+import { CHAMPION_BONUS, ADVANCE_BONUS } from "@/lib/scoring";
 import { ChampionDeadlineNote } from "./ChampionDeadlineNote";
 import type { MatchStage } from "@/types";
 
@@ -49,6 +49,21 @@ const TIERS: Tier[] = [
     color: "var(--bad)",
     pred: "1–2",
     res: "2–0",
+  },
+];
+
+const ADVANCE_EXAMPLES: { ctx: string; tier: string; base: number; mult: number }[] = [
+  {
+    ctx: "Cuartos · pronosticás 2-0 y sale 2-0. Tu local gana, así que avanza.",
+    tier: "Marcador exacto",
+    base: 5,
+    mult: 2,
+  },
+  {
+    ctx: "Octavos · pronosticás 1-1 y que avanza Brasil. Sale 2-2 y Brasil pasa por penales.",
+    tier: "Diferencia exacta",
+    base: 3,
+    mult: 2,
   },
 ];
 
@@ -210,8 +225,73 @@ export default function ReglasPage() {
         </Card>
       </Section>
 
+      {/* Eliminatorias: quién avanza */}
+      <Section eyebrow="Paso 4" title="Eliminatorias: ¿quién avanza?">
+        <Card
+          style={{
+            padding: 20,
+            display: "flex",
+            alignItems: "center",
+            gap: 16,
+            flexWrap: "wrap",
+            background: "var(--gold-soft)",
+            borderColor: "var(--gold-border)",
+          }}
+        >
+          <span style={{ fontSize: "2.4rem" }}>🎯</span>
+          <div style={{ flex: 1, minWidth: 220 }}>
+            <div style={{ fontWeight: 700, fontSize: "1.05rem" }}>
+              +{ADVANCE_BONUS} puntos por acertar quién avanza
+            </div>
+            <p style={{ color: "var(--text-dim)", margin: "4px 0 0", fontSize: "0.92rem" }}>
+              En las eliminatorias sumás +{ADVANCE_BONUS} por acertar quién avanza (o gana,
+              en la final y el 3er puesto). Si pronosticás un{" "}
+              <strong style={{ color: "var(--text)" }}>ganador</strong>, ese es el que avanza.
+              Si pronosticás <strong style={{ color: "var(--text)" }}>empate</strong>, elegís
+              vos quién pasa (lo que se definiría por penales).
+              <br />
+              <strong style={{ color: "var(--text)" }}>Ojo:</strong> el marcador siempre se
+              cuenta al final de los <strong style={{ color: "var(--text)" }}>90 minutos</strong>;
+              el tiempo extra y los penales no cambian el marcador para los puntos.
+            </p>
+          </div>
+          <span className="display tabular" style={{ fontSize: "2.6rem", color: "var(--gold)" }}>
+            +{ADVANCE_BONUS}
+          </span>
+        </Card>
+
+        <Card style={{ padding: 20, display: "flex", flexDirection: "column", gap: 0 }}>
+          {ADVANCE_EXAMPLES.map((ex, i) => (
+            <div
+              key={ex.ctx}
+              style={{
+                display: "flex",
+                flexDirection: "column",
+                gap: 10,
+                padding: "14px 0",
+                borderTop: i === 0 ? "none" : "1px solid var(--border)",
+              }}
+            >
+              <p style={{ margin: 0, color: "var(--text-dim)", fontSize: "0.92rem" }}>{ex.ctx}</p>
+              <div style={{ display: "flex", alignItems: "center", gap: 10, flexWrap: "wrap" }}>
+                <Pill tone="gold">{ex.tier}</Pill>
+                <span className="tabular" style={{ color: "var(--text-dim)" }}>{ex.base} base</span>
+                <span style={{ color: "var(--text-faint)" }}>×</span>
+                <Pill tone="gold">×{ex.mult}</Pill>
+                <span style={{ color: "var(--text-faint)" }}>+</span>
+                <Pill tone="gold">🎯 +{ADVANCE_BONUS}</Pill>
+                <span style={{ color: "var(--text-faint)" }}>=</span>
+                <span className="display tabular" style={{ fontSize: "1.5rem", color: "var(--good)" }}>
+                  {ex.base * ex.mult + ADVANCE_BONUS} pts
+                </span>
+              </div>
+            </div>
+          ))}
+        </Card>
+      </Section>
+
       {/* Desempate */}
-      <Section eyebrow="Paso 4" title="¿Y si hay empate?">
+      <Section eyebrow="Paso 5" title="¿Y si hay empate?">
         <p style={{ color: "var(--text-dim)", marginTop: -4 }}>
           Si dos jugadores quedan con los mismos puntos, se desempata en este orden:
         </p>

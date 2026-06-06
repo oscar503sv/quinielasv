@@ -1,4 +1,4 @@
-import { totalPoints, basePoints, CHAMPION_BONUS } from "@/lib/scoring";
+import { totalPoints, basePoints, advanceBonus, resolveAdvancer, CHAMPION_BONUS } from "@/lib/scoring";
 import type { Match, Prediction, Standing, Tournament, User } from "@/types";
 
 /** Tasa de aciertos = pronósticos con puntos (5/3/1) sobre los hechos. */
@@ -9,7 +9,8 @@ const hitRate = (s: Standing): number =>
  * Calcula el ranking/estadísticas on-the-fly desde los partidos finalizados,
  * los pronósticos y los usuarios. Función pura (testeable y reusable).
  * Si el torneo tiene `champion` definido, suma el bono del campeón a quienes
- * lo acertaron.
+ * lo acertaron. En eliminatorias suma el bono de avance a quien acertó quién
+ * avanzó/ganó la llave.
  *
  * Desempate: puntos → más marcadores exactos → más diferencias exactas →
  * mejor % de aciertos → orden alfabético (fallback determinista).
@@ -54,6 +55,10 @@ export function computeStandings(
     const pred = { home: p.home, away: p.away };
     const base = basePoints(pred, match.result);
     row.pts += totalPoints(pred, match.result, match.stage);
+    row.pts += advanceBonus(
+      resolveAdvancer(match.home, match.away, pred, p.advances),
+      match.advances,
+    );
     row.played += 1;
     if (base === 5) row.exact += 1;
     else if (base === 3) row.gd += 1;

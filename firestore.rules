@@ -27,7 +27,11 @@ service cloud.firestore {
       return t.predictionsLocked != true
         && t.finished != true
         && m.status == 'upcoming'
-        && m.lockAt > request.time.toMillis();
+        && m.lockAt > request.time.toMillis()
+        // El "quién avanza" (eliminatorias) debe ser uno de los equipos o null.
+        && (request.resource.data.advances == null
+            || request.resource.data.advances == m.home
+            || request.resource.data.advances == m.away);
     }
 
     // Catálogo: lectura para usuarios autenticados, escritura solo Admin SDK.

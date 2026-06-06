@@ -23,6 +23,7 @@ function toPrediction(id: string, data: Record<string, unknown>): Prediction {
     matchId: data.matchId as string,
     home: data.home as number,
     away: data.away as number,
+    advances: (data.advances as string | null) ?? null,
     updatedAt: (data.updatedAt as number) ?? 0,
   };
 }
@@ -57,7 +58,7 @@ export function subscribeAllPredictions(
 export async function upsertPrediction(
   userId: string,
   matchId: string,
-  score: { home: number; away: number },
+  score: { home: number; away: number; advances: string | null },
 ): Promise<void> {
   const id = predId(userId, matchId);
   await setDoc(doc(db, COL, id), {
@@ -65,6 +66,7 @@ export async function upsertPrediction(
     matchId,
     home: score.home,
     away: score.away,
+    advances: score.advances,
     updatedAt: Date.now(),
   });
 }

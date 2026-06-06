@@ -9,7 +9,7 @@ import { ScoreStepper } from "@/components/ui/ScoreStepper";
 import { useData } from "@/features/data/DataProvider";
 import { finalizeMatch } from "@/features/admin/admin-client";
 import { teamName } from "@/constants/teams";
-import { STAGES } from "@/constants/stages";
+import { STAGES, isKnockout } from "@/constants/stages";
 import { fireConfetti } from "@/lib/confetti";
 import { clampScore } from "@/lib/score-utils";
 import type { Match } from "@/types";
@@ -17,14 +17,28 @@ import type { Match } from "@/types";
 function ResultCard({ match }: { match: Match }) {
   const [home, setHome] = useState(match.result?.home ?? 0);
   const [away, setAway] = useState(match.result?.away ?? 0);
+  const [advances, setAdvances] = useState<string | null>(match.advances ?? null);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
+  const knockout = isKnockout(match.stage);
+  // El que avanza se deriva del marcador; solo si es empate hay que indicarlo.
+  const isDraw = home === away;
+  const needsAdvancer = knockout && isDraw;
+  const advanceLabel =
+    match.stage === "final" || match.stage === "third_place"
+      ? "¿Quién gana la llave?"
+      : "¿Quién avanza?";
+
   async function finalize() {
+    if (needsAdvancer && !advances) {
+      setError("Empate en los 90': indicá qué equipo avanza (penales).");
+      return;
+    }
     setBusy(true);
     setError(null);
     try {
-      const res = await finalizeMatch(match.id, { home, away });
+      const res = await finalizeMatch(match.id, { home, away }, needsAdvancer ? advances : null);
       fireConfetti();
       // El partido pasará a `finished` y desaparecerá de esta lista (suscripción).
       void res;
@@ -53,6 +67,44 @@ function ResultCard({ match }: { match: Match }) {
         </div>
       </div>
 
+      {needsAdvancer && (
+        <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+          <span style={{ fontSize: "0.8rem", color: "var(--text-dim)" }}>
+            Empate en los 90&apos; · {advanceLabel} <span style={{ color: "var(--text-faint)" }}>(define el bono de avance)</span>
+          </span>
+          <div style={{ display: "flex", gap: 8 }}>
+            {[match.home, match.away].map((code) => {
+              const active = advances === code;
+              return (
+                <button
+                  key={code}
+                  type="button"
+                  disabled={busy}
+                  onClick={() => setAdvances(code)}
+                  className="card"
+                  style={{
+                    flex: 1,
+                    minWidth: 0,
+                    display: "flex",
+                    alignItems: "center",
+                    gap: 8,
+                    padding: "8px 10px",
+                    cursor: busy ? "not-allowed" : "pointer",
+                    borderColor: active ? "var(--gold-border)" : "var(--border)",
+                    background: active ? "var(--gold-soft)" : "var(--surface)",
+                  }}
+                >
+                  <Flag code={code} w={26} h={18} r={4} />
+                  <span style={{ fontWeight: 600, fontSize: "0.84rem", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+                    {teamName(code)}
+                  </span>
+                  {active && <span style={{ marginLeft: "auto", color: "var(--gold)", fontWeight: 800 }}>✓</span>}
+                </button>
+              );
+            })}
+          </div>
+        </div>
+      )}
       {error && <span className="field-err">{error}</span>}
       <Button variant="gold" block disabled={busy} onClick={finalize}>
         {busy ? "Finalizando…" : "Finalizar partido"}

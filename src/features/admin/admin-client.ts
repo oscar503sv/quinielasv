@@ -35,11 +35,11 @@ export async function deleteMatch(id: string) {
   return data as { ok: true; predictionsDeleted: number };
 }
 
-export function finalizeMatch(matchId: string, result: Score) {
+export function finalizeMatch(matchId: string, result: Score, advances: string | null = null) {
   return send<{ ok: true; predictionsScored: number }>(
     "/api/admin/finalize-match",
     "POST",
-    { matchId, ...result },
+    { matchId, ...result, advances },
   );
 }
 

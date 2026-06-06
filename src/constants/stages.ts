@@ -11,6 +11,9 @@ export const STAGES: Record<MatchStage, Stage> = {
   final: { label: "Final", mult: 3 },
 };
 
+/** ¿Es una fase de eliminación directa (no la fase de grupos)? */
+export const isKnockout = (stage: MatchStage): boolean => stage !== "group";
+
 export const STAGE_ORDER: MatchStage[] = [
   "group",
   "round_of_32",
