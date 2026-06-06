@@ -276,15 +276,25 @@ export function MatchCard({ match, myPrediction }: MatchCardProps) {
         <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
           <TeamRow code={match.home} score={match.result.home} />
           <TeamRow code={match.away} score={match.result.away} />
-          <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 8, marginTop: 6 }}>
+          {knockout && match.advances && <AdvancedLine code={match.advances} />}
+          <div
+            style={{
+              display: "flex",
+              flexDirection: "column",
+              gap: 6,
+              marginTop: 2,
+              paddingTop: 8,
+              borderTop: "1px solid var(--border)",
+            }}
+          >
             <span style={{ fontSize: "0.82rem", color: "var(--text-dim)" }}>
               {myPrediction
-                ? `Tu pronóstico: ${myPrediction.home}–${myPrediction.away}`
+                ? `Tu pronóstico: ${myPrediction.home}–${myPrediction.away}${
+                    myPrediction.advances ? ` · avanza ${teamName(myPrediction.advances)}` : ""
+                  }`
                 : "Sin pronóstico"}
             </span>
-            {myPrediction ? (
-              <FinishedResult match={match} pred={myPrediction} />
-            ) : null}
+            {myPrediction && <FinishedBreakdown match={match} pred={myPrediction} />}
           </div>
         </div>
       )}
@@ -292,24 +302,42 @@ export function MatchCard({ match, myPrediction }: MatchCardProps) {
   );
 }
 
-function FinishedResult({ match, pred }: { match: Match; pred: Prediction }) {
+function AdvancedLine({ code }: { code: string }) {
+  return (
+    <span style={{ display: "inline-flex", alignItems: "center", gap: 6, fontSize: "0.8rem", color: "var(--text-dim)" }}>
+      Avanzó: <Flag code={code} w={20} h={14} r={3} />
+      <strong style={{ color: "var(--text)" }}>{teamName(code)}</strong>
+    </span>
+  );
+}
+
+function FinishedBreakdown({ match, pred }: { match: Match; pred: Prediction }) {
   if (!match.result) return null;
   const kind = resultKind({ home: pred.home, away: pred.away }, match.result);
+  const scorePts = totalPoints({ home: pred.home, away: pred.away }, match.result, match.stage);
   const bonus = advanceBonus(
     resolveAdvancer(match.home, match.away, { home: pred.home, away: pred.away }, pred.advances),
     match.advances,
   );
-  const pts = totalPoints({ home: pred.home, away: pred.away }, match.result, match.stage) + bonus;
+  const total = scorePts + bonus;
   const tone = kind === "fallo" ? "bad" : "good";
   return (
-    <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+    <div style={{ display: "flex", alignItems: "center", gap: 8, flexWrap: "wrap" }}>
       <Pill tone={tone}>{kind}</Pill>
-      {bonus > 0 && <Pill tone="gold" title="Acertaste quién avanza">🎯 +{bonus}</Pill>}
+      {isKnockout(match.stage) && (
+        <span style={{ fontSize: "0.82rem", color: "var(--text-dim)", display: "inline-flex", alignItems: "center", gap: 6 }}>
+          marcador <strong style={{ color: "var(--text)" }}>+{scorePts}</strong>
+          <span style={{ color: "var(--text-faint)" }}>·</span>
+          avance{" "}
+          <strong style={{ color: bonus > 0 ? "var(--gold)" : "var(--text-faint)" }}>+{bonus}</strong>
+          <span style={{ color: "var(--text-faint)" }}>=</span>
+        </span>
+      )}
       <span
         className="display tabular"
-        style={{ color: pts > 0 ? "var(--good)" : "var(--text-faint)", fontWeight: 800 }}
+        style={{ color: total > 0 ? "var(--good)" : "var(--text-faint)", fontWeight: 800 }}
       >
-        +{pts}
+        +{total}
       </span>
     </div>
   );
