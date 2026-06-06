@@ -200,7 +200,7 @@ export function MatchCard({ match, myPrediction }: MatchCardProps) {
             </div>
           ) : (
             <span style={{ fontSize: "0.8rem", color: "var(--text-faint)" }}>
-              🎯 Avanza quien gane en los 90&apos; · <span style={{ color: "var(--gold)" }}>+{ADVANCE_BONUS}</span> si acertás
+              🎯 Tu ganador avanza · <span style={{ color: "var(--gold)" }}>+{ADVANCE_BONUS}</span> si acertás
             </span>
           ))}
           {error && <span className="field-err">{error}</span>}
