@@ -81,7 +81,7 @@ export default function EstadisticasPage() {
             <StatTile label="Puntos totales" value={me?.pts ?? 0} accent />
             <StatTile label="Marcadores exactos" value={exact} />
             <StatTile label="Tendencias" value={trend} />
-            <StatTile label="Posición actual" value={myPosition ? `#${myPosition}` : "—"} />
+            <StatTile label="Posición actual" value={played > 0 ? `#${myPosition}` : "—"} />
           </div>
 
           <div className="section-grid">

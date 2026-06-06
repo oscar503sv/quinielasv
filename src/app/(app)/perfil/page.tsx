@@ -25,6 +25,7 @@ export default function PerfilPage() {
 
   const [name, setName] = useState("");
   const [savingName, setSavingName] = useState(false);
+  const [nameMsg, setNameMsg] = useState<{ ok: boolean; text: string } | null>(null);
 
   useEffect(() => {
     // eslint-disable-next-line react-hooks/set-state-in-effect
@@ -34,8 +35,13 @@ export default function PerfilPage() {
   async function saveName() {
     if (!uid || !name.trim()) return;
     setSavingName(true);
+    setNameMsg(null);
     try {
       await updateUserDoc(uid, { name: name.trim() });
+      setNameMsg({ ok: true, text: "✓ Guardado" });
+      setTimeout(() => setNameMsg(null), 2500);
+    } catch {
+      setNameMsg({ ok: false, text: "No se pudo guardar. Probá de nuevo." });
     } finally {
       setSavingName(false);
     }
@@ -60,7 +66,7 @@ export default function PerfilPage() {
             <span style={{ color: "var(--text-dim)", fontSize: "0.88rem" }}>{email}</span>
           </div>
           <div style={{ display: "flex", gap: 8 }}>
-            <Pill tone="gold">#{myPosition || "—"}</Pill>
+            <Pill tone="gold">{me && me.played > 0 ? `#${myPosition}` : "—"}</Pill>
             <Pill tone="good">{me?.pts ?? 0} pts</Pill>
           </div>
         </div>
@@ -74,11 +80,22 @@ export default function PerfilPage() {
           <input id="email" className="input" value={email ?? ""} disabled />
         </div>
 
-        <div style={{ display: "flex", gap: 10, flexWrap: "wrap" }}>
+        <div style={{ display: "flex", gap: 10, flexWrap: "wrap", alignItems: "center" }}>
           <Button variant="gold" disabled={savingName} onClick={saveName}>
             {savingName ? "Guardando…" : "Guardar cambios"}
           </Button>
           <ThemeToggle />
+          {nameMsg && (
+            <span
+              style={{
+                fontSize: "0.86rem",
+                fontWeight: 600,
+                color: nameMsg.ok ? "var(--good)" : "var(--bad)",
+              }}
+            >
+              {nameMsg.text}
+            </span>
+          )}
         </div>
       </Card>
 

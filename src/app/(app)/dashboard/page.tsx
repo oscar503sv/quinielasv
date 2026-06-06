@@ -17,6 +17,7 @@ export default function DashboardPage() {
   const { matches, myPredictions, standings, myPosition, loading } = useData();
 
   const me = standings.find((s) => s.me);
+  const ranked = standings.some((s) => s.played > 0);
   const pending = useMemo(
     () =>
       matches.filter((m) => canPredict(m) && !myPredictions.has(m.id)).length,
@@ -48,8 +49,8 @@ export default function DashboardPage() {
       <div className="stat-grid">
         <StatTile
           label="Tu posición"
-          value={myPosition ? `#${myPosition}` : "—"}
-          hint={`de ${standings.length} jugadores`}
+          value={ranked ? `#${myPosition}` : "—"}
+          hint={ranked ? `de ${standings.length} jugadores` : "cuando arranque el torneo"}
         />
         <StatTile
           label="Puntos totales"
