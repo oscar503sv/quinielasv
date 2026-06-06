@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { Card } from "@/components/ui/Card";
 import { Button } from "@/components/ui/Button";
 import { Pill } from "@/components/ui/Pill";
@@ -9,9 +9,9 @@ import { MatchForm } from "@/features/admin/MatchForm";
 import { useData } from "@/features/data/DataProvider";
 import { createMatch, updateMatch, deleteMatch } from "@/features/admin/admin-client";
 import { teamName } from "@/constants/teams";
-import { STAGES } from "@/constants/stages";
+import { STAGES, STAGE_ORDER } from "@/constants/stages";
 import type { MatchInput } from "@/repositories/admin.server";
-import type { Match, MatchStatus } from "@/types";
+import type { Match, MatchStage, MatchStatus } from "@/types";
 
 const STATUS_PILL: Record<MatchStatus, { label: string; tone: "good" | "bad" | "blue" | "dim" }> = {
   finished: { label: "Finalizado", tone: "good" },
@@ -20,6 +20,8 @@ const STATUS_PILL: Record<MatchStatus, { label: string; tone: "good" | "bad" | "
   locked: { label: "Bloqueado", tone: "dim" },
 };
 
+const PER_PAGE = 25;
+
 type Editing = { mode: "create" } | { mode: "edit"; match: Match } | null;
 
 export default function AdminPartidosPage() {
@@ -27,6 +29,23 @@ export default function AdminPartidosPage() {
   const [editing, setEditing] = useState<Editing>(null);
   const [busy, setBusy] = useState(false);
   const [deletingId, setDeletingId] = useState<string | null>(null);
+  const [fStatus, setFStatus] = useState<MatchStatus | "all">("all");
+  const [fStage, setFStage] = useState<MatchStage | "all">("all");
+  const [page, setPage] = useState(0);
+
+  const filtered = useMemo(
+    () =>
+      matches.filter(
+        (m) =>
+          (fStatus === "all" || m.status === fStatus) &&
+          (fStage === "all" || m.stage === fStage),
+      ),
+    [matches, fStatus, fStage],
+  );
+
+  const pageCount = Math.max(1, Math.ceil(filtered.length / PER_PAGE));
+  const safePage = Math.min(page, pageCount - 1);
+  const pageRows = filtered.slice(safePage * PER_PAGE, safePage * PER_PAGE + PER_PAGE);
 
   async function handleDelete(m: Match) {
     const ok = window.confirm(
@@ -84,8 +103,50 @@ export default function AdminPartidosPage() {
         />
       )}
 
+      {/* Filtros */}
+      <div style={{ display: "flex", gap: 12, flexWrap: "wrap", alignItems: "flex-end" }}>
+        <div className="field" style={{ minWidth: 180 }}>
+          <label>Estado</label>
+          <select
+            className="input"
+            value={fStatus}
+            onChange={(e) => {
+              setFStatus(e.target.value as MatchStatus | "all");
+              setPage(0);
+            }}
+          >
+            <option value="all">Todos</option>
+            <option value="upcoming">Programado</option>
+            <option value="live">En vivo</option>
+            <option value="finished">Finalizado</option>
+            <option value="locked">Bloqueado</option>
+          </select>
+        </div>
+        <div className="field" style={{ minWidth: 200 }}>
+          <label>Fase</label>
+          <select
+            className="input"
+            value={fStage}
+            onChange={(e) => {
+              setFStage(e.target.value as MatchStage | "all");
+              setPage(0);
+            }}
+          >
+            <option value="all">Todas</option>
+            {STAGE_ORDER.map((s) => (
+              <option key={s} value={s}>{STAGES[s].label}</option>
+            ))}
+          </select>
+        </div>
+        <span style={{ color: "var(--text-dim)", fontSize: "0.86rem", paddingBottom: 10 }}>
+          {filtered.length} partido{filtered.length === 1 ? "" : "s"}
+        </span>
+      </div>
+
       {loading ? (
         <p style={{ color: "var(--text-dim)" }}>Cargando…</p>
+      ) : filtered.length === 0 ? (
+        <p style={{ color: "var(--text-dim)" }}>No hay partidos con esos filtros.</p>
       ) : (
         <Card style={{ padding: 0, overflow: "hidden" }}>
           <table style={{ width: "100%", borderCollapse: "collapse" }}>
@@ -99,7 +160,7 @@ export default function AdminPartidosPage() {
               </tr>
             </thead>
             <tbody>
-              {matches.map((m) => {
+              {pageRows.map((m) => {
                 const sp = STATUS_PILL[m.status];
                 return (
                   <tr key={m.id} style={{ borderTop: "1px solid var(--border)" }}>
@@ -145,6 +206,20 @@ export default function AdminPartidosPage() {
             </tbody>
           </table>
         </Card>
+      )}
+
+      {pageCount > 1 && (
+        <div style={{ display: "flex", alignItems: "center", gap: 12, flexWrap: "wrap" }}>
+          <Button variant="outline" disabled={safePage === 0} onClick={() => setPage(safePage - 1)}>
+            ← Anterior
+          </Button>
+          <span className="tabular" style={{ color: "var(--text-dim)", fontSize: "0.9rem" }}>
+            Página {safePage + 1} de {pageCount}
+          </span>
+          <Button variant="outline" disabled={safePage >= pageCount - 1} onClick={() => setPage(safePage + 1)}>
+            Siguiente →
+          </Button>
+        </div>
       )}
     </div>
   );

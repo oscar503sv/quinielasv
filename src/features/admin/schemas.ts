@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { TBD } from "@/constants/teams";
 
 const STAGE = z.enum([
   "group",
@@ -23,10 +24,11 @@ const matchFields = z.object({
   lockAt: z.number().int().positive(),
 });
 
-export const matchInputSchema = matchFields.refine((d) => d.home !== d.away, {
-  message: "Los equipos deben ser distintos",
-  path: ["away"],
-});
+export const matchInputSchema = matchFields.refine(
+  // Permite "Por definir" en ambos (cruce de eliminatoria sin definir).
+  (d) => d.home !== d.away || d.home === TBD,
+  { message: "Los equipos deben ser distintos", path: ["away"] },
+);
 
 // `.partial()` sobre el objeto base (sin el refine, que Zod no permite partializar).
 export const matchPatchSchema = matchFields.partial();

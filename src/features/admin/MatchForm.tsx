@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { Card } from "@/components/ui/Card";
 import { Button } from "@/components/ui/Button";
-import { TEAMS } from "@/constants/teams";
+import { TEAMS, TBD } from "@/constants/teams";
 import { STAGES, STAGE_ORDER } from "@/constants/stages";
 import type { MatchInput } from "@/repositories/admin.server";
 import type { Match, MatchStatus } from "@/types";
@@ -62,7 +62,7 @@ export function MatchForm({ initial, busy, onSubmit, onCancel }: MatchFormProps)
 
   function submit() {
     setError(null);
-    if (home === away) {
+    if (home === away && home !== TBD) {
       setError("Local y visitante deben ser distintos.");
       return;
     }
@@ -96,6 +96,7 @@ export function MatchForm({ initial, busy, onSubmit, onCancel }: MatchFormProps)
         <div className="field">
           <label>Local</label>
           <select className="input" value={home} onChange={(e) => setHome(e.target.value)}>
+            <option value={TBD}>— Por definir —</option>
             {TEAMS.map((t) => (
               <option key={t.code} value={t.code}>{t.name}</option>
             ))}
@@ -104,6 +105,7 @@ export function MatchForm({ initial, busy, onSubmit, onCancel }: MatchFormProps)
         <div className="field">
           <label>Visitante</label>
           <select className="input" value={away} onChange={(e) => setAway(e.target.value)}>
+            <option value={TBD}>— Por definir —</option>
             {TEAMS.map((t) => (
               <option key={t.code} value={t.code}>{t.name}</option>
             ))}

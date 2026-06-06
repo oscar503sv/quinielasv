@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { Card } from "@/components/ui/Card";
 import { Button } from "@/components/ui/Button";
 import { Pill } from "@/components/ui/Pill";
@@ -61,9 +61,29 @@ function ResultCard({ match }: { match: Match }) {
   );
 }
 
+const KICKOFF_OFFSET_MS = 5 * 60 * 1000; // lockAt + 5min = inicio del partido
+const PER_PAGE = 24;
+
+/** ¿Mostrar este partido en Resultados? Live siempre; upcoming solo si ya empezó (o showAll). */
+function isFinalizable(m: Match, showAll: boolean): boolean {
+  if (m.status === "live") return true;
+  if (m.status !== "upcoming") return false;
+  return showAll || Date.now() >= m.lockAt + KICKOFF_OFFSET_MS;
+}
+
 export default function AdminResultadosPage() {
   const { matches, loading } = useData();
-  const pending = matches.filter((m) => m.status === "live" || m.status === "upcoming");
+  const [showAll, setShowAll] = useState(false);
+  const [page, setPage] = useState(0);
+
+  const visible = useMemo(
+    () => matches.filter((m) => isFinalizable(m, showAll)).sort((a, b) => a.lockAt - b.lockAt),
+    [matches, showAll],
+  );
+
+  const pageCount = Math.max(1, Math.ceil(visible.length / PER_PAGE));
+  const safePage = Math.min(page, pageCount - 1);
+  const pageRows = visible.slice(safePage * PER_PAGE, safePage * PER_PAGE + PER_PAGE);
 
   return (
     <div style={{ display: "flex", flexDirection: "column", gap: 20 }}>
@@ -76,16 +96,42 @@ export default function AdminResultadosPage() {
         </p>
       </div>
 
+      <div style={{ display: "flex", gap: 12, alignItems: "center", flexWrap: "wrap" }}>
+        <Button variant={showAll ? "gold" : "outline"} onClick={() => { setShowAll((v) => !v); setPage(0); }}>
+          {showAll ? "Ver solo jugados" : "Mostrar todos los próximos"}
+        </Button>
+        <span style={{ color: "var(--text-dim)", fontSize: "0.86rem" }}>
+          {visible.length} partido{visible.length === 1 ? "" : "s"}
+        </span>
+      </div>
+
       {loading ? (
         <p style={{ color: "var(--text-dim)" }}>Cargando…</p>
-      ) : pending.length === 0 ? (
-        <p style={{ color: "var(--text-dim)" }}>No hay partidos en vivo o por finalizar.</p>
+      ) : visible.length === 0 ? (
+        <p style={{ color: "var(--text-dim)" }}>
+          No hay partidos jugados pendientes de finalizar. Usá “Mostrar todos los próximos” para ver los que vienen.
+        </p>
       ) : (
-        <div className="match-grid">
-          {pending.map((m) => (
-            <ResultCard key={m.id} match={m} />
-          ))}
-        </div>
+        <>
+          <div className="match-grid">
+            {pageRows.map((m) => (
+              <ResultCard key={m.id} match={m} />
+            ))}
+          </div>
+          {pageCount > 1 && (
+            <div style={{ display: "flex", alignItems: "center", gap: 12, flexWrap: "wrap" }}>
+              <Button variant="outline" disabled={safePage === 0} onClick={() => setPage(safePage - 1)}>
+                ← Anterior
+              </Button>
+              <span className="tabular" style={{ color: "var(--text-dim)", fontSize: "0.9rem" }}>
+                Página {safePage + 1} de {pageCount}
+              </span>
+              <Button variant="outline" disabled={safePage >= pageCount - 1} onClick={() => setPage(safePage + 1)}>
+                Siguiente →
+              </Button>
+            </div>
+          )}
+        </>
       )}
     </div>
   );
