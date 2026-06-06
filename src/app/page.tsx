@@ -4,6 +4,7 @@ import { getCurrentUser } from "@/lib/auth/session";
 import { AuthCard } from "@/features/auth/AuthCard";
 import { Flag } from "@/components/ui/Flag";
 import { Pill } from "@/components/ui/Pill";
+import { flagUrl } from "@/lib/utils";
 
 const HERO_FLAGS = [
   "ar", "br", "fr", "gb-eng", "es", "de", "pt", "nl", "mx", "us", "uy", "co",
@@ -57,8 +58,17 @@ export default async function LandingPage() {
           style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 16 }}
         >
           <AuthCard />
-          <span style={{ fontSize: "0.82rem", color: "var(--text-dim)" }}>
-            Hecho con 💙 por Oscar Aragón
+          <span style={{ display: "inline-flex", alignItems: "center", gap: 6, fontSize: "0.82rem", color: "var(--text-dim)" }}>
+            <span>Hecho desde</span>
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
+              src={flagUrl("sv")}
+              alt="El Salvador"
+              width={20}
+              height={14}
+              style={{ borderRadius: 3, objectFit: "cover", boxShadow: "0 0 0 1px var(--border)" }}
+            />
+            <span>por <strong style={{ color: "var(--gold)" }}>Oscar</strong></span>
           </span>
         </section>
       </main>
