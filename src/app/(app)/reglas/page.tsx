@@ -52,6 +52,21 @@ const TIERS: Tier[] = [
   },
 ];
 
+const ADVANCE_EXAMPLES: { ctx: string; tier: string; base: number; mult: number }[] = [
+  {
+    ctx: "Cuartos · pronosticás 2-0 y sale 2-0. Tu local gana, así que avanza.",
+    tier: "Marcador exacto",
+    base: 5,
+    mult: 2,
+  },
+  {
+    ctx: "Octavos · pronosticás 1-1 y que avanza Brasil. Sale 2-2 y Brasil pasa por penales.",
+    tier: "Diferencia exacta",
+    base: 3,
+    mult: 2,
+  },
+];
+
 const TIEBREAKS: { title: string; desc: string }[] = [
   { title: "Más puntos", desc: "El total acumulado en toda la quiniela." },
   { title: "Más marcadores exactos", desc: "Quién clavó más resultados justos (5 pts)." },
@@ -243,6 +258,35 @@ export default function ReglasPage() {
           <span className="display tabular" style={{ fontSize: "2.6rem", color: "var(--gold)" }}>
             +{ADVANCE_BONUS}
           </span>
+        </Card>
+
+        <Card style={{ padding: 20, display: "flex", flexDirection: "column", gap: 0 }}>
+          {ADVANCE_EXAMPLES.map((ex, i) => (
+            <div
+              key={ex.ctx}
+              style={{
+                display: "flex",
+                flexDirection: "column",
+                gap: 10,
+                padding: "14px 0",
+                borderTop: i === 0 ? "none" : "1px solid var(--border)",
+              }}
+            >
+              <p style={{ margin: 0, color: "var(--text-dim)", fontSize: "0.92rem" }}>{ex.ctx}</p>
+              <div style={{ display: "flex", alignItems: "center", gap: 10, flexWrap: "wrap" }}>
+                <Pill tone="gold">{ex.tier}</Pill>
+                <span className="tabular" style={{ color: "var(--text-dim)" }}>{ex.base} base</span>
+                <span style={{ color: "var(--text-faint)" }}>×</span>
+                <Pill tone="gold">×{ex.mult}</Pill>
+                <span style={{ color: "var(--text-faint)" }}>+</span>
+                <Pill tone="gold">🎯 +{ADVANCE_BONUS}</Pill>
+                <span style={{ color: "var(--text-faint)" }}>=</span>
+                <span className="display tabular" style={{ fontSize: "1.5rem", color: "var(--good)" }}>
+                  {ex.base * ex.mult + ADVANCE_BONUS} pts
+                </span>
+              </div>
+            </div>
+          ))}
         </Card>
       </Section>
 
