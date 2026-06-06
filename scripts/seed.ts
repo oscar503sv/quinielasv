@@ -7,8 +7,8 @@
 import "dotenv/config";
 import { cert, getApps, initializeApp } from "firebase-admin/app";
 import { getFirestore } from "firebase-admin/firestore";
-import { TEAMS } from "../src/constants/teams";
-import type { Match } from "../src/types";
+import { TEAMS, TBD } from "../src/constants/teams";
+import type { Match, MatchStage } from "../src/types";
 
 function initAdmin() {
   if (getApps().length) return;
@@ -41,6 +41,22 @@ function fmtDate(ms: number): string {
   );
   const clean = (s: string) => (s ?? "").replace(/\./g, "");
   return `${clean(p.weekday)} ${p.day} ${clean(p.month)} · ${p.hour}:${p.minute}`;
+}
+
+// Solo fecha (sin hora) en El Salvador → "dom 28 jun". Para eliminatorias, donde
+// el horario exacto aún es tentativo.
+const esDayFmt = new Intl.DateTimeFormat("es", {
+  weekday: "short",
+  day: "numeric",
+  month: "short",
+  timeZone: "America/El_Salvador",
+});
+function fmtDay(ms: number): string {
+  const p = Object.fromEntries(
+    esDayFmt.formatToParts(ms).map((x) => [x.type, x.value]),
+  );
+  const clean = (s: string) => (s ?? "").replace(/\./g, "");
+  return `${clean(p.weekday)} ${p.day} ${clean(p.month)}`;
 }
 
 /**
@@ -126,7 +142,7 @@ const FIXTURES: [string, string, string][] = [
   ["jo", "ar", "2026-06-27T22:00:00-04:00"],
 ];
 
-const MATCHES: Match[] = FIXTURES.map(([home, away, et], i) => {
+const GROUP_MATCHES: Match[] = FIXTURES.map(([home, away, et], i) => {
   const kickoff = Date.parse(et);
   return {
     id: `m${String(i + 1).padStart(2, "0")}`,
@@ -139,6 +155,54 @@ const MATCHES: Match[] = FIXTURES.map(([home, away, et], i) => {
     result: null,
   };
 });
+
+/**
+ * 32 partidos de eliminatorias [ronda, fecha (YYYY-MM-DD, El Salvador)].
+ * Participantes "Por definir" y bloqueados hasta que el admin cargue los equipos.
+ * Fechas por ronda según el calendario publicado (horas tentativas, se editan
+ * en Admin → Partidos al definirse el bracket).
+ */
+const KNOCKOUT: [MatchStage, string][] = [
+  // Dieciseisavos (16) — 28 jun a 3 jul
+  ["round_of_32", "2026-06-28"], ["round_of_32", "2026-06-28"],
+  ["round_of_32", "2026-06-29"], ["round_of_32", "2026-06-29"], ["round_of_32", "2026-06-29"],
+  ["round_of_32", "2026-06-30"], ["round_of_32", "2026-06-30"], ["round_of_32", "2026-06-30"],
+  ["round_of_32", "2026-07-01"], ["round_of_32", "2026-07-01"],
+  ["round_of_32", "2026-07-02"], ["round_of_32", "2026-07-02"], ["round_of_32", "2026-07-02"],
+  ["round_of_32", "2026-07-03"], ["round_of_32", "2026-07-03"], ["round_of_32", "2026-07-03"],
+  // Octavos (8) — 4 a 7 jul
+  ["round_of_16", "2026-07-04"], ["round_of_16", "2026-07-04"],
+  ["round_of_16", "2026-07-05"], ["round_of_16", "2026-07-05"],
+  ["round_of_16", "2026-07-06"], ["round_of_16", "2026-07-06"],
+  ["round_of_16", "2026-07-07"], ["round_of_16", "2026-07-07"],
+  // Cuartos (4) — 9 a 11 jul
+  ["quarterfinal", "2026-07-09"],
+  ["quarterfinal", "2026-07-10"],
+  ["quarterfinal", "2026-07-11"], ["quarterfinal", "2026-07-11"],
+  // Semifinales (2) — 14 y 15 jul
+  ["semifinal", "2026-07-14"],
+  ["semifinal", "2026-07-15"],
+  // Tercer lugar (1) — 18 jul
+  ["third_place", "2026-07-18"],
+  // Final (1) — 19 jul
+  ["final", "2026-07-19"],
+];
+
+const KNOCKOUT_MATCHES: Match[] = KNOCKOUT.map(([stage, day], i) => {
+  const ms = Date.parse(`${day}T12:00:00-06:00`); // mediodía El Salvador (orden)
+  return {
+    id: `m${String(GROUP_MATCHES.length + i + 1).padStart(2, "0")}`,
+    home: TBD,
+    away: TBD,
+    stage,
+    status: "locked",
+    date: fmtDay(ms),
+    lockAt: ms,
+    result: null,
+  };
+});
+
+const MATCHES: Match[] = [...GROUP_MATCHES, ...KNOCKOUT_MATCHES];
 
 async function main() {
   initAdmin();

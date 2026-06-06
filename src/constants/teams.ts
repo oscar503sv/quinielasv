@@ -72,7 +72,11 @@ export const TEAM: Record<string, Team> = Object.fromEntries(
   TEAMS.map((t) => [t.code, t]),
 );
 
+/** Participante aún sin definir (cruces de eliminatorias). */
+export const TBD = "tbd";
+
 export function teamName(code: string | null | undefined): string {
   if (!code) return "—";
+  if (code === TBD) return "Por definir";
   return TEAM[code]?.name ?? code.toUpperCase();
 }

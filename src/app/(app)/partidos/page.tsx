@@ -24,13 +24,13 @@ const startOfDay = (ms: number) => {
 };
 
 function dayKey(m: Match): string {
-  if (m.status === "locked") return "tbd";
+  if (!m.lockAt) return "tbd";
   const d = new Date(m.lockAt + KICKOFF_OFFSET_MS);
   return `${d.getFullYear()}-${d.getMonth()}-${d.getDate()}`;
 }
 
 function dayLabel(m: Match, now = Date.now()): string {
-  if (m.status === "locked") return "Por definir";
+  if (!m.lockAt) return "Por definir";
   const ms = m.lockAt + KICKOFF_OFFSET_MS;
   const diff = Math.round((startOfDay(ms) - startOfDay(now)) / 86_400_000);
   if (diff === 0) return "Hoy";

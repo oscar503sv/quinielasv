@@ -1,4 +1,5 @@
 import { flagUrl } from "@/lib/utils";
+import { TEAM } from "@/constants/teams";
 
 interface FlagProps {
   code: string | null | undefined;
@@ -13,7 +14,8 @@ interface FlagProps {
 
 /** Bandera real por código ISO (flagcdn), con anillo de 1px. */
 export function Flag({ code, w = 32, h = 22, r = 5, className }: FlagProps) {
-  if (!code) {
+  // Sin código o código que no es una selección real (p.ej. "tbd"): recuadro neutro.
+  if (!code || !TEAM[code]) {
     return (
       <span
         className={className}
