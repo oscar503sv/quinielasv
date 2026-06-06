@@ -1,6 +1,8 @@
 "use client";
 
+import { useState } from "react";
 import { Card } from "@/components/ui/Card";
+import { Button } from "@/components/ui/Button";
 import { Flag } from "@/components/ui/Flag";
 import { Pill } from "@/components/ui/Pill";
 import { useData } from "@/features/data/DataProvider";
@@ -9,6 +11,7 @@ import type { Standing } from "@/types";
 const MEDALS = ["🥇", "🥈", "🥉"];
 const PODIUM_ORDER = [1, 0, 2]; // visual 2-1-3
 const PODIUM_HEIGHT = [96, 130, 76];
+const PER_PAGE = 25;
 
 function PodiumSpot({ s, place }: { s: Standing; place: number }) {
   return (
@@ -39,7 +42,17 @@ function PodiumSpot({ s, place }: { s: Standing; place: number }) {
 
 export default function RankingPage() {
   const { standings, tournament, loading } = useData();
+  const [page, setPage] = useState(0);
   const podium = PODIUM_ORDER.map((i) => standings[i]).filter(Boolean) as Standing[];
+
+  // Paginación derivada en render (clamp por si la lista cambia en vivo).
+  const pageCount = Math.max(1, Math.ceil(standings.length / PER_PAGE));
+  const safePage = Math.min(page, pageCount - 1);
+  const pageRows = standings.slice(safePage * PER_PAGE, safePage * PER_PAGE + PER_PAGE);
+
+  const myIndex = standings.findIndex((s) => s.me);
+  const myPage = myIndex === -1 ? -1 : Math.floor(myIndex / PER_PAGE);
+  const canJumpToMe = myIndex !== -1 && myPage !== safePage;
 
   return (
     <div style={{ display: "flex", flexDirection: "column", gap: 22 }}>
@@ -79,7 +92,7 @@ export default function RankingPage() {
                 </tr>
               </thead>
               <tbody>
-                {standings.map((s, i) => (
+                {pageRows.map((s, i) => (
                   <tr
                     key={s.userId}
                     style={{
@@ -87,7 +100,9 @@ export default function RankingPage() {
                       background: s.me ? "var(--gold-soft)" : "transparent",
                     }}
                   >
-                    <td className="tabular" style={{ padding: "11px 14px", fontWeight: 700, color: "var(--text-dim)" }}>{i + 1}</td>
+                    <td className="tabular" style={{ padding: "11px 14px", fontWeight: 700, color: "var(--text-dim)" }}>
+                      {safePage * PER_PAGE + i + 1}
+                    </td>
                     <td style={{ padding: "11px 14px" }}>
                       <span style={{ display: "inline-flex", alignItems: "center", gap: 9 }}>
                         <Flag code={s.support} w={26} h={18} r={4} />
@@ -106,6 +121,30 @@ export default function RankingPage() {
               </tbody>
             </table>
           </Card>
+
+          {/* Paginación */}
+          {pageCount > 1 && (
+            <div style={{ display: "flex", alignItems: "center", gap: 12, flexWrap: "wrap" }}>
+              <Button variant="outline" disabled={safePage === 0} onClick={() => setPage(safePage - 1)}>
+                ← Anterior
+              </Button>
+              <span className="tabular" style={{ color: "var(--text-dim)", fontSize: "0.9rem" }}>
+                Página {safePage + 1} de {pageCount}
+              </span>
+              <Button
+                variant="outline"
+                disabled={safePage >= pageCount - 1}
+                onClick={() => setPage(safePage + 1)}
+              >
+                Siguiente →
+              </Button>
+              {canJumpToMe && (
+                <Button variant="ghost" onClick={() => setPage(myPage)} style={{ marginLeft: "auto" }}>
+                  Ir a mi posición (#{myIndex + 1})
+                </Button>
+              )}
+            </div>
+          )}
         </>
       )}
     </div>
