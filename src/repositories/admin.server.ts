@@ -23,6 +23,7 @@ function matchFromDoc(id: string, data: FirebaseFirestore.DocumentData): Match {
     date: data.date ?? "",
     lockAt: data.lockAt ?? 0,
     result: data.result ?? null,
+    advances: data.advances ?? null,
   };
 }
 
@@ -30,6 +31,7 @@ export async function createMatch(input: MatchInput): Promise<string> {
   const ref = await getAdminDb().collection("matches").add({
     ...input,
     result: null,
+    advances: null,
   });
   return ref.id;
 }
@@ -79,6 +81,7 @@ export async function getPredictionsForMatch(
       matchId: data.matchId,
       home: data.home,
       away: data.away,
+      advances: data.advances ?? null,
       updatedAt: data.updatedAt ?? 0,
     };
   });

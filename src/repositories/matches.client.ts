@@ -15,6 +15,7 @@ function toMatch(id: string, data: Record<string, unknown>): Match {
     date: (data.date as string) ?? "",
     lockAt: (data.lockAt as number) ?? 0,
     result: result ? ({ home: result.home, away: result.away } as Score) : null,
+    advances: (data.advances as string | null) ?? null,
   };
 }
 

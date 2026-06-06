@@ -6,9 +6,9 @@ import { Button } from "@/components/ui/Button";
 import { Pill } from "@/components/ui/Pill";
 import { Flag } from "@/components/ui/Flag";
 import { ScoreStepper } from "@/components/ui/ScoreStepper";
-import { STAGES } from "@/constants/stages";
+import { STAGES, isKnockout } from "@/constants/stages";
 import { teamName } from "@/constants/teams";
-import { resultKind, totalPoints } from "@/lib/scoring";
+import { resultKind, totalPoints, advanceBonus, ADVANCE_BONUS } from "@/lib/scoring";
 import { lockLabel } from "@/lib/utils";
 import { clampScore } from "@/lib/score-utils";
 import { useNow } from "@/lib/use-now";
@@ -64,9 +64,13 @@ export function MatchCard({ match, myPrediction }: MatchCardProps) {
   const stage = STAGES[match.stage];
   const frozen = predictionsFrozen(tournament);
   const open = canPredict(match, now) && !frozen;
+  const knockout = isKnockout(match.stage);
+  const advanceLabel =
+    match.stage === "final" || match.stage === "third_place" ? "¿Quién gana?" : "¿Quién avanza?";
 
   const [home, setHome] = useState(myPrediction?.home ?? 0);
   const [away, setAway] = useState(myPrediction?.away ?? 0);
+  const [advances, setAdvances] = useState<string | null>(myPrediction?.advances ?? null);
   const [saved, setSaved] = useState(false);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -77,18 +81,22 @@ export function MatchCard({ match, myPrediction }: MatchCardProps) {
       // eslint-disable-next-line react-hooks/set-state-in-effect
       setHome(myPrediction.home);
       setAway(myPrediction.away);
+      setAdvances(myPrediction.advances ?? null);
     }
   }, [myPrediction]);
 
   const dirty =
-    !myPrediction || myPrediction.home !== home || myPrediction.away !== away;
+    !myPrediction ||
+    myPrediction.home !== home ||
+    myPrediction.away !== away ||
+    (myPrediction.advances ?? null) !== advances;
 
   async function handleSave() {
     if (!uid) return;
     setBusy(true);
     setError(null);
     try {
-      await savePrediction(uid, match, { home, away }, frozen);
+      await savePrediction(uid, match, { home, away }, advances, frozen);
       setSaved(true);
       fireConfetti();
       setTimeout(() => setSaved(false), 2500);
@@ -148,6 +156,44 @@ export function MatchCard({ match, myPrediction }: MatchCardProps) {
               />
             </div>
           </div>
+          {knockout && (
+            <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+              <span style={{ fontSize: "0.8rem", color: "var(--text-dim)" }}>
+                {advanceLabel} <span style={{ color: "var(--gold)" }}>+{ADVANCE_BONUS}</span>
+              </span>
+              <div style={{ display: "flex", gap: 8 }}>
+                {[match.home, match.away].map((code) => {
+                  const active = advances === code;
+                  return (
+                    <button
+                      key={code}
+                      type="button"
+                      disabled={busy}
+                      onClick={() => setAdvances((v) => (v === code ? null : code))}
+                      className="card"
+                      style={{
+                        flex: 1,
+                        minWidth: 0,
+                        display: "flex",
+                        alignItems: "center",
+                        gap: 8,
+                        padding: "8px 10px",
+                        cursor: busy ? "not-allowed" : "pointer",
+                        borderColor: active ? "var(--gold-border)" : "var(--border)",
+                        background: active ? "var(--gold-soft)" : "var(--surface)",
+                      }}
+                    >
+                      <Flag code={code} w={26} h={18} r={4} />
+                      <span style={{ fontWeight: 600, fontSize: "0.84rem", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+                        {teamName(code)}
+                      </span>
+                      {active && <span style={{ marginLeft: "auto", color: "var(--gold)", fontWeight: 800 }}>✓</span>}
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+          )}
           {error && <span className="field-err">{error}</span>}
           {saved ? (
             <Button variant="gold" block disabled>
@@ -240,11 +286,13 @@ export function MatchCard({ match, myPrediction }: MatchCardProps) {
 function FinishedResult({ match, pred }: { match: Match; pred: Prediction }) {
   if (!match.result) return null;
   const kind = resultKind({ home: pred.home, away: pred.away }, match.result);
-  const pts = totalPoints({ home: pred.home, away: pred.away }, match.result, match.stage);
+  const bonus = advanceBonus(pred.advances, match.advances);
+  const pts = totalPoints({ home: pred.home, away: pred.away }, match.result, match.stage) + bonus;
   const tone = kind === "fallo" ? "bad" : "good";
   return (
     <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
       <Pill tone={tone}>{kind}</Pill>
+      {bonus > 0 && <Pill tone="gold" title="Acertaste quién avanza">🎯 +{bonus}</Pill>}
       <span
         className="display tabular"
         style={{ color: pts > 0 ? "var(--good)" : "var(--text-faint)", fontWeight: 800 }}

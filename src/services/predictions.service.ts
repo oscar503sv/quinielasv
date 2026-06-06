@@ -1,5 +1,6 @@
 import { upsertPrediction } from "@/repositories/predictions.client";
 import { clampScore } from "@/lib/score-utils";
+import { isKnockout } from "@/constants/stages";
 import type { Match, Score } from "@/types";
 
 export class PredictionError extends Error {}
@@ -18,6 +19,7 @@ export async function savePrediction(
   userId: string,
   match: Match,
   score: Score,
+  advances: string | null = null,
   frozen = false,
 ): Promise<void> {
   if (frozen) {
@@ -28,8 +30,17 @@ export async function savePrediction(
       "El pronóstico ya no se puede editar: el partido está cerrado.",
     );
   }
+  // El "quién avanza" solo aplica a eliminatorias y debe ser uno de los equipos.
+  let pick: string | null = null;
+  if (isKnockout(match.stage) && advances) {
+    if (advances !== match.home && advances !== match.away) {
+      throw new PredictionError("El equipo que avanza no es válido.");
+    }
+    pick = advances;
+  }
   await upsertPrediction(userId, match.id, {
     home: clampScore(score.home),
     away: clampScore(score.away),
+    advances: pick,
   });
 }

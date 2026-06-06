@@ -34,3 +34,14 @@ export function resultKind(pred: Score, res: Score): ResultKind {
 
 /** Bono por acertar el campeón del Mundial (spec §4). */
 export const CHAMPION_BONUS = 25;
+
+/** Bono por acertar quién avanza/gana en un partido de eliminatoria. */
+export const ADVANCE_BONUS = 5;
+
+/**
+ * Bono de avance: se otorga si el partido ya tiene definido quién avanzó
+ * (`actual`) y el jugador acertó ese equipo. En grupos `actual` es null → 0.
+ */
+export function advanceBonus(pred: string | null, actual: string | null): number {
+  return actual != null && pred === actual ? ADVANCE_BONUS : 0;
+}

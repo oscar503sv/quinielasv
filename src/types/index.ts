@@ -43,6 +43,8 @@ export interface Match {
   /** Timestamp epoch (ms) de cierre de pronósticos. */
   lockAt: number;
   result: Score | null;
+  /** Equipo que avanzó/ganó la llave (eliminatorias). null en grupos o sin finalizar. */
+  advances: string | null;
 }
 
 export interface Prediction {
@@ -51,6 +53,8 @@ export interface Prediction {
   matchId: string;
   home: number;
   away: number;
+  /** Equipo que el jugador cree que avanza/gana (eliminatorias). null si no eligió. */
+  advances: string | null;
   updatedAt: number;
 }
 

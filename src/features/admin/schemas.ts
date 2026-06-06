@@ -37,6 +37,7 @@ export const finalizeSchema = z.object({
   matchId: z.string().min(1),
   home: score,
   away: score,
+  advances: z.string().min(1).nullable().optional(),
 });
 
 export const tournamentSchema = z.object({

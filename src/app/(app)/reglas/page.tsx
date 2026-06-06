@@ -2,7 +2,7 @@ import type { ReactNode } from "react";
 import { Card } from "@/components/ui/Card";
 import { Pill } from "@/components/ui/Pill";
 import { STAGES } from "@/constants/stages";
-import { CHAMPION_BONUS } from "@/lib/scoring";
+import { CHAMPION_BONUS, ADVANCE_BONUS } from "@/lib/scoring";
 import { ChampionDeadlineNote } from "./ChampionDeadlineNote";
 import type { MatchStage } from "@/types";
 
@@ -210,8 +210,42 @@ export default function ReglasPage() {
         </Card>
       </Section>
 
+      {/* Eliminatorias: quién avanza */}
+      <Section eyebrow="Paso 4" title="Eliminatorias: ¿quién avanza?">
+        <Card
+          style={{
+            padding: 20,
+            display: "flex",
+            alignItems: "center",
+            gap: 16,
+            flexWrap: "wrap",
+            background: "var(--gold-soft)",
+            borderColor: "var(--gold-border)",
+          }}
+        >
+          <span style={{ fontSize: "2.4rem" }}>🎯</span>
+          <div style={{ flex: 1, minWidth: 220 }}>
+            <div style={{ fontWeight: 700, fontSize: "1.05rem" }}>
+              +{ADVANCE_BONUS} puntos por acertar quién avanza
+            </div>
+            <p style={{ color: "var(--text-dim)", margin: "4px 0 0", fontSize: "0.92rem" }}>
+              En las eliminatorias, además del marcador, elegís qué equipo pasa de ronda (o
+              gana, en la final y el 3er puesto). Si acertás, sumás +{ADVANCE_BONUS}.
+              <br />
+              <strong style={{ color: "var(--text)" }}>Ojo:</strong> el marcador siempre se
+              cuenta al final de los <strong style={{ color: "var(--text)" }}>90 minutos</strong>.
+              El tiempo extra y los penales no cambian el marcador para los puntos, solo
+              definen quién avanza.
+            </p>
+          </div>
+          <span className="display tabular" style={{ fontSize: "2.6rem", color: "var(--gold)" }}>
+            +{ADVANCE_BONUS}
+          </span>
+        </Card>
+      </Section>
+
       {/* Desempate */}
-      <Section eyebrow="Paso 4" title="¿Y si hay empate?">
+      <Section eyebrow="Paso 5" title="¿Y si hay empate?">
         <p style={{ color: "var(--text-dim)", marginTop: -4 }}>
           Si dos jugadores quedan con los mismos puntos, se desempata en este orden:
         </p>

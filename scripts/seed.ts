@@ -153,6 +153,7 @@ const GROUP_MATCHES: Match[] = FIXTURES.map(([home, away, et], i) => {
     date: fmtDate(kickoff),
     lockAt: kickoff - LOCK_LEAD_MS,
     result: null,
+    advances: null,
   };
 });
 
@@ -199,6 +200,7 @@ const KNOCKOUT_MATCHES: Match[] = KNOCKOUT.map(([stage, day], i) => {
     date: fmtDay(ms),
     lockAt: ms,
     result: null,
+    advances: null,
   };
 });
 
