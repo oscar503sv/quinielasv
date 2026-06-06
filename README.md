@@ -17,7 +17,7 @@ Firebase Auth + Firestore (Client + Admin SDK) · TanStack Query · React Hook F
   por cookie httpOnly (Admin SDK).
 - **Pronósticos**: marcador con stepper; puntos 5/3/1/0 × multiplicador de fase;
   cierre 5 min antes de cada partido. Lista agrupada por día.
-- **Campeón** (+10): elegible/editable hasta el cierre configurable (`championLockAt`),
+- **Campeón** (+25): elegible/editable hasta el cierre configurable (`championLockAt`),
   validado server-side. Independiente del equipo del corazón.
 - **Ranking** (podio + tabla paginada, con bono campeón) y **estadísticas**.
 - **Panel admin** (`/admin`): partidos (ABM con filtros y paginación), resultados

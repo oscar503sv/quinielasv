@@ -60,7 +60,7 @@ export interface User {
   email: string;
   /** Equipo del corazón (define el avatar). Código de equipo. */
   support: string | null;
-  /** Predicción de campeón (bono +10). Código de equipo. */
+  /** Predicción de campeón (bono del campeón). Código de equipo. */
   championPrediction: string | null;
 }
 
@@ -75,7 +75,7 @@ export interface Standing {
   trend: number; // tendencia (1)
   miss: number; // fallos (0)
   played: number; // partidos finalizados pronosticados
-  championBonus: boolean; // acertó el campeón oficial (+10 incluido en pts)
+  championBonus: boolean; // acertó el campeón oficial (bono del campeón incluido en pts)
   me?: boolean;
 }
 

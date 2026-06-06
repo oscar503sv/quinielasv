@@ -33,4 +33,4 @@ export function resultKind(pred: Score, res: Score): ResultKind {
 }
 
 /** Bono por acertar el campeón del Mundial (spec §4). */
-export const CHAMPION_BONUS = 10;
+export const CHAMPION_BONUS = 25;

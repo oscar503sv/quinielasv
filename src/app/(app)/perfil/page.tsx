@@ -14,6 +14,7 @@ import { useData } from "@/features/data/DataProvider";
 import { updateUserDoc } from "@/repositories/users.client";
 import { logout } from "@/features/auth/auth-client";
 import { teamName } from "@/constants/teams";
+import { CHAMPION_BONUS } from "@/lib/scoring";
 import { isChampionOpen } from "@/lib/champion";
 
 export default function PerfilPage() {
@@ -126,7 +127,7 @@ export default function PerfilPage() {
           <div style={{ flex: 1 }}>
             <h2 style={{ margin: 0, fontSize: "1.15rem" }}>Tu campeón del Mundial 🏆</h2>
             <p style={{ color: "var(--text-dim)", marginTop: 4, fontSize: "0.9rem" }}>
-              Quién creés que va a ganar la copa · +10 pts si acertás.
+              Quién creés que va a ganar la copa · +{CHAMPION_BONUS} pts si acertás.
             </p>
           </div>
           {profile?.championPrediction ? (

@@ -4,8 +4,8 @@ import type { Match, Prediction, Standing, Tournament, User } from "@/types";
 /**
  * Calcula el ranking/estadísticas on-the-fly desde los partidos finalizados,
  * los pronósticos y los usuarios. Función pura (testeable y reusable).
- * Si el torneo tiene `champion` definido, suma el bono de +10 a quienes lo
- * acertaron.
+ * Si el torneo tiene `champion` definido, suma el bono del campeón a quienes
+ * lo acertaron.
  */
 export function computeStandings(
   matches: Match[],

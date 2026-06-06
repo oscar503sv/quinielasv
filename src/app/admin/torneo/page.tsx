@@ -9,6 +9,7 @@ import { TeamPicker } from "@/features/profile/TeamPicker";
 import { useData } from "@/features/data/DataProvider";
 import { updateTournament } from "@/features/admin/admin-client";
 import { teamName } from "@/constants/teams";
+import { CHAMPION_BONUS } from "@/lib/scoring";
 import { fireConfetti } from "@/lib/confetti";
 import type { Tournament } from "@/types";
 
@@ -183,7 +184,7 @@ export default function AdminTorneoPage() {
         <div>
           <h2 style={{ margin: 0, fontSize: "1.15rem" }}>Campeón oficial 🏆</h2>
           <p style={{ color: "var(--text-dim)", marginTop: 4, fontSize: "0.9rem" }}>
-            Al definir el campeón se otorgan +10 puntos a quienes lo acertaron.
+            Al definir el campeón se otorgan +{CHAMPION_BONUS} puntos a quienes lo acertaron.
           </p>
         </div>
         {tournament?.champion && (

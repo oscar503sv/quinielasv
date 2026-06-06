@@ -12,6 +12,7 @@ import { useData } from "@/features/data/DataProvider";
 import { teamName } from "@/constants/teams";
 import { canPredict } from "@/services/predictions.service";
 import { predictionsFrozen } from "@/lib/tournament";
+import { CHAMPION_BONUS } from "@/lib/scoring";
 
 export default function DashboardPage() {
   const { profile } = useAuth();
@@ -148,7 +149,7 @@ export default function DashboardPage() {
                 <Flag code={s.support} w={24} h={17} r={4} />
                 <span style={{ fontWeight: 600 }}>{s.name}</span>
                 {s.me && <Pill tone="gold">tú</Pill>}
-                {s.championBonus && <span title="Acertó el campeón · +10">🏆</span>}
+                {s.championBonus && <span title={`Acertó el campeón · +${CHAMPION_BONUS}`}>🏆</span>}
                 <span className="display tabular" style={{ marginLeft: "auto" }}>{s.pts}</span>
               </div>
             ))

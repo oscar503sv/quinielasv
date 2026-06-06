@@ -10,6 +10,7 @@ import { useAuth } from "@/features/auth/AuthProvider";
 import { useData } from "@/features/data/DataProvider";
 import { setChampion } from "@/features/profile/champion-client";
 import { teamName } from "@/constants/teams";
+import { CHAMPION_BONUS } from "@/lib/scoring";
 import { isChampionOpen } from "@/lib/champion";
 import { fireConfetti } from "@/lib/confetti";
 
@@ -54,11 +55,11 @@ export default function CampeonPage() {
   return (
     <div style={{ display: "flex", flexDirection: "column", gap: 22, paddingBottom: 120 }}>
       <div style={{ textAlign: "center", display: "flex", flexDirection: "column", gap: 8 }}>
-        <span className="eyebrow">Bono campeón · +10 puntos</span>
+        <span className="eyebrow">Bono campeón · +{CHAMPION_BONUS} puntos</span>
         <h1 style={{ fontSize: "2rem", margin: 0 }}>¿Quién levantará la copa? 🏆</h1>
         <p style={{ color: "var(--text-dim)", maxWidth: 520, margin: "0 auto" }}>
           Elegí la selección que creés que va a ganar el Mundial. Si acertás, sumás
-          +10 puntos al final del torneo.
+          +{CHAMPION_BONUS} puntos al final del torneo.
         </p>
         {open && lockAt && (
           <span style={{ fontSize: "0.84rem", color: "var(--text-dim)" }}>

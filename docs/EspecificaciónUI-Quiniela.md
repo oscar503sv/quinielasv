@@ -161,7 +161,7 @@ basePoints(pred, res):
 totalPoints = basePoints * STAGES[stage].mult
 ```
 
-**Bono campeón:** +10 puntos si el equipo elegido como campeón gana el Mundial (se otorga al finalizar el torneo desde el panel admin).
+**Bono campeón:** +25 puntos si el equipo elegido como campeón gana el Mundial (se otorga al finalizar el torneo desde el panel admin).
 
 `resultKind(pred,res)` devuelve la etiqueta: `'exacto'` (5) / `'dif. exacta'` (3) / `'tendencia'` (1) / `'fallo'` (0).
 
@@ -222,13 +222,13 @@ Estado persistido en `localStorage`: pantalla actual (`q26_screen`), tema (`q26_
 ### 6.6 Perfil (usuario)
 - Tarjeta principal: avatar (bandera del equipo del corazón), nombre, email, pills de posición y puntos. Campos editables (nombre; email deshabilitado). Botones "Guardar cambios" y toggle de tema.
 - **Tu equipo del corazón 💙:** selector de las 48 selecciones. Su bandera es el avatar en toda la app y se actualiza en vivo. Texto: "A quién le vas · su bandera es tu foto de perfil".
-- **Tu campeón del Mundial 🏆:** tarjeta-botón → pantalla de elegir campeón. Texto: "Quién creés que va a ganar la copa · +10 pts si acertás".
+- **Tu campeón del Mundial 🏆:** tarjeta-botón → pantalla de elegir campeón. Texto: "Quién creés que va a ganar la copa · +25 pts si acertás".
 - Botón "Cerrar sesión" → Landing.
 
 > **Distinción clave:** *equipo del corazón* (a quién apoya, define el avatar) y *campeón* (predicción de quién gana, da bono) son **independientes**.
 
 ### 6.7 Elegir Campeón (usuario)
-- Encabezado centrado: eyebrow "Bono campeón · +10 puntos", título "¿Quién levantará la copa? 🏆", explicación.
+- Encabezado centrado: eyebrow "Bono campeón · +25 puntos", título "¿Quién levantará la copa? 🏆", explicación.
 - Grid de selecciones (tarjetas con bandera + nombre); la elegida se resalta con borde dorado y ✓.
 - Barra **sticky** abajo con la elección actual + "Cancelar" / "Confirmar campeón" (confeti al confirmar → Dashboard).
 
@@ -247,7 +247,7 @@ Estado persistido en `localStorage`: pantalla actual (`q26_screen`), tema (`q26_
 
 ### 6.11 Admin · Torneo
 - Tarjeta de estado con **toggles**: Torneo iniciado · Bloquear todos los pronósticos · Torneo finalizado (cada uno con su descripción).
-- Sección **Campeón oficial 🏆:** selector de selección + botón "Definir campeón y otorgar bonos" (otorga +10 a quienes lo acertaron).
+- Sección **Campeón oficial 🏆:** selector de selección + botón "Definir campeón y otorgar bonos" (otorga +25 a quienes lo acertaron).
 
 ---
 

@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/Button";
 import { Flag } from "@/components/ui/Flag";
 import { Pill } from "@/components/ui/Pill";
 import { useData } from "@/features/data/DataProvider";
+import { CHAMPION_BONUS } from "@/lib/scoring";
 import type { Standing } from "@/types";
 
 const PODIUM_ORDER = [1, 0, 2]; // columnas visuales: 2.º · 1.º · 3.º
@@ -46,7 +47,7 @@ function PodiumSpot({ s, rank }: { s: Standing; rank: number }) {
         </span>
       </div>
       <span style={{ fontWeight: 700, fontSize: "0.9rem", textAlign: "center" }}>
-        {s.name} {s.championBonus && <span title="Acertó el campeón · +10">🏆</span>}
+        {s.name} {s.championBonus && <span title={`Acertó el campeón · +${CHAMPION_BONUS}`}>🏆</span>}
       </span>
       <span className="display tabular" style={{ color: t.accent }}>{s.pts}</span>
       <div
@@ -149,7 +150,7 @@ export default function RankingPage() {
                         <span style={{ fontWeight: 600 }}>{s.name}</span>
                         {s.me && <Pill tone="gold">tú</Pill>}
                         {s.championBonus && (
-                          <Pill tone="gold" title="Acertó el campeón · +10 pts">🏆 +10</Pill>
+                          <Pill tone="gold" title={`Acertó el campeón · +${CHAMPION_BONUS} pts`}>🏆 +{CHAMPION_BONUS}</Pill>
                         )}
                       </span>
                     </td>

@@ -48,7 +48,7 @@ Aplicación web para que amigos y familiares participen en una quiniela del Mund
 - Final: x3
 
 ### Bono campeón
-+10 puntos si acierta el campeón.
++25 puntos si acierta el campeón.
 
 ## Colecciones Firestore
 
