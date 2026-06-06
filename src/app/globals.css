@@ -377,6 +377,7 @@ a {
   cursor: pointer;
   border: none;
   background: transparent;
+  white-space: nowrap;
   transition: background 0.18s ease, color 0.18s ease;
 }
 .tab[data-active="true"] {
@@ -385,11 +386,22 @@ a {
 }
 
 /* ---- Nav / topbar ---- */
+.topbar-nav {
+  display: flex;
+  gap: 2px;
+  margin-left: 8px;
+  flex: 1;
+  overflow-x: auto;
+}
+.topbar-burger {
+  display: none;
+}
 .nav-link {
   padding: 8px 12px;
   border-radius: 9px;
   font-size: 0.9rem;
   font-weight: 600;
+  white-space: nowrap;
   color: var(--text-dim);
   background: transparent;
   transition: background 0.18s ease, color 0.18s ease;
@@ -424,6 +436,7 @@ a {
   border-radius: 50%;
   overflow: hidden;
   object-fit: cover;
+  flex-shrink: 0;
   box-shadow: 0 0 0 1px var(--border);
 }
 
@@ -510,5 +523,23 @@ a {
   }
   .match-grid {
     grid-template-columns: 1fr;
+  }
+  .tabs {
+    display: flex;
+    width: 100%;
+  }
+  .tab {
+    flex: 1 1 auto;
+    text-align: center;
+  }
+}
+
+/* Navbar: en móvil se ocultan los links inline y aparece el botón hamburguesa. */
+@media (max-width: 720px) {
+  .topbar-nav {
+    display: none;
+  }
+  .topbar-burger {
+    display: inline-flex;
   }
 }

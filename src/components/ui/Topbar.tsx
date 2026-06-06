@@ -5,6 +5,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { ThemeToggle } from "./ThemeToggle";
 import { UserMenu } from "./UserMenu";
+import { MobileNav } from "./MobileNav";
 
 const NAV = [
   { href: "/dashboard", label: "Dashboard" },
@@ -53,7 +54,7 @@ export function Topbar() {
         <span style={{ color: "var(--gold)" }}>2026</span>
       </Link>
 
-      <nav style={{ display: "flex", gap: 2, marginLeft: 8, flex: 1, overflowX: "auto" }}>
+      <nav className="topbar-nav">
         {NAV.map((item) => (
           <Link
             key={item.href}
@@ -66,8 +67,11 @@ export function Topbar() {
         ))}
       </nav>
 
-      <ThemeToggle />
-      <UserMenu />
+      <div style={{ marginLeft: "auto", display: "inline-flex", alignItems: "center", gap: 16 }}>
+        <ThemeToggle />
+        <MobileNav nav={NAV} />
+        <UserMenu />
+      </div>
     </header>
   );
 }
