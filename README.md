@@ -107,4 +107,4 @@ se lee reactivamente vía `tournament/config` y afecta la UI en vivo.
 
 ---
 
-Hecho desde 🇸🇻 por **Oscar**.
+Hecho desde 🇸🇻 **2026**.
