@@ -24,6 +24,29 @@ export async function getLeagueById(id: string): Promise<League | null> {
   return snap.exists ? leagueFromDoc(snap.id, snap.data()!) : null;
 }
 
+/** Todas las ligas (solo admin, vía Admin SDK), ordenadas por antigüedad. */
+export async function getAllLeagues(): Promise<League[]> {
+  const snap = await getAdminDb().collection(COL).get();
+  return snap.docs
+    .map((d) => leagueFromDoc(d.id, d.data()))
+    .sort((a, b) => a.createdAt - b.createdAt);
+}
+
+/** Ligas que un usuario posee (es `ownerUid`). */
+export async function getOwnedLeagues(uid: string): Promise<League[]> {
+  const snap = await getAdminDb().collection(COL).where("ownerUid", "==", uid).get();
+  return snap.docs.map((d) => leagueFromDoc(d.id, d.data()));
+}
+
+/** Ligas en las que un usuario figura como miembro. */
+export async function getMemberLeagues(uid: string): Promise<League[]> {
+  const snap = await getAdminDb()
+    .collection(COL)
+    .where("memberUids", "array-contains", uid)
+    .get();
+  return snap.docs.map((d) => leagueFromDoc(d.id, d.data()));
+}
+
 export async function getLeagueByCode(code: string): Promise<League | null> {
   const snap = await getAdminDb().collection(COL).where("code", "==", code).limit(1).get();
   const doc = snap.docs[0];

@@ -1,5 +1,5 @@
 import type { MatchInput } from "@/repositories/admin.server";
-import type { Score, Tournament } from "@/types";
+import type { League, Score, Tournament } from "@/types";
 
 async function send<T>(
   url: string,
@@ -59,4 +59,26 @@ export async function deleteUser(uid: string) {
     throw new Error((data as { error?: string }).error ?? "Error del servidor");
   }
   return data as { ok: true; predictionsDeleted: number };
+}
+
+export async function listLeagues() {
+  const res = await fetch("/api/admin/leagues");
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) {
+    throw new Error((data as { error?: string }).error ?? "Error del servidor");
+  }
+  return (data as { leagues: League[] }).leagues;
+}
+
+export function renameLeagueAdmin(id: string, name: string) {
+  return send<{ ok: true }>(`/api/admin/leagues/${id}`, "PATCH", { name });
+}
+
+export async function deleteLeagueAdmin(id: string) {
+  const res = await fetch(`/api/admin/leagues/${id}`, { method: "DELETE" });
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) {
+    throw new Error((data as { error?: string }).error ?? "Error del servidor");
+  }
+  return data as { ok: true };
 }

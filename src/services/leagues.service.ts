@@ -107,3 +107,36 @@ export async function deleteLeague(uid: string, id: string): Promise<void> {
     performedBy: uid,
   });
 }
+
+// --- Moderación (admin): mismas operaciones pero sin el chequeo de propietario. ---
+
+export async function adminRenameLeague(
+  id: string,
+  name: string,
+  performedBy: string,
+): Promise<void> {
+  const clean = cleanName(name);
+  const league = await getLeagueById(id);
+  if (!league) throw new LeagueError("La liga no existe.");
+  await updateLeagueDoc(id, { name: clean });
+  await writeAuditLog({
+    action: "admin_rename_league",
+    entityType: "league",
+    entityId: id,
+    performedBy,
+    metadata: { from: league.name, to: clean },
+  });
+}
+
+export async function adminDeleteLeague(id: string, performedBy: string): Promise<void> {
+  const league = await getLeagueById(id);
+  if (!league) throw new LeagueError("La liga no existe.");
+  await deleteLeagueDoc(id);
+  await writeAuditLog({
+    action: "admin_delete_league",
+    entityType: "league",
+    entityId: id,
+    performedBy,
+    metadata: { name: league.name, code: league.code },
+  });
+}

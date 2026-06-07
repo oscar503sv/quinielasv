@@ -35,8 +35,9 @@ Firebase Auth + Firestore (Client + Admin SDK) · TanStack Query · React Hook F
   pendientes de finalizar), partidos (ABM con filtros y paginación), resultados
   (finalización + cálculo de puntos, incluido quién avanza en eliminatorias, y **corrección
   de un resultado ya finalizado** con recálculo de puntos), jugadores (ver pronósticos y
-  eliminar cuentas), y torneo (iniciar / congelar pronósticos / finalizar / campeón oficial
-  / deadline). El rol admin es la allowlist `ADMIN_EMAILS` (no un flag por usuario).
+  eliminar cuentas), ligas (ver todas con sus miembros y clasificación, renombrar o borrar
+  cualquiera para moderar), y torneo (iniciar / congelar pronósticos / finalizar / campeón
+  oficial / deadline). El rol admin es la allowlist `ADMIN_EMAILS` (no un flag por usuario).
 
 ## Puesta en marcha
 
@@ -103,7 +104,7 @@ los 90'; en eliminatorias, `Match.advances`/`Prediction.advances` y `resolveAdva
 resuelven quién avanza (ganador del marcador o, si es empate, el desempate por penales).
 
 **Mutaciones sensibles** (finalizar partidos, ABM de partidos, torneo, eliminar jugadores,
-definir campeón del jugador) pasan por route handlers `/api/admin/*` y `/api/champion` con
+moderar ligas, definir campeón del jugador) pasan por route handlers `/api/admin/*` y `/api/champion` con
 el **Admin SDK**; las reglas de Firestore bloquean esas escrituras desde el cliente. Cada
 handler **re-verifica** la sesión (`requireAdmin()`/`getCurrentUser()`): el gating de
 `src/app/admin/layout.tsx` es solo cosmético, así que manipular el cliente con devtools no
