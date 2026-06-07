@@ -2,10 +2,14 @@ import { NextResponse } from "next/server";
 import { z } from "zod";
 import { getCurrentUser } from "@/lib/auth/session";
 import { setChampion, ChampionError } from "@/services/champion.service";
+import { rateLimit, clientIp, tooMany } from "@/lib/rate-limit";
 
 const schema = z.object({ champion: z.string().min(1) });
 
 export async function POST(request: Request) {
+  const limit = rateLimit(`champion:${clientIp(request)}`, 30, 60_000);
+  if (!limit.ok) return tooMany(limit.retryAfter);
+
   const user = await getCurrentUser();
   if (!user) return NextResponse.json({ error: "No autorizado" }, { status: 401 });
 

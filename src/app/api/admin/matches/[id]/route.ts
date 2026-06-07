@@ -6,11 +6,15 @@ import {
   writeAuditLog,
 } from "@/repositories/admin.server";
 import { matchPatchSchema } from "@/features/admin/schemas";
+import { rateLimit, clientIp, tooMany } from "@/lib/rate-limit";
 
 export async function PATCH(
   request: Request,
   { params }: { params: Promise<{ id: string }> },
 ) {
+  const limit = rateLimit(`admin:${clientIp(request)}`, 60, 60_000);
+  if (!limit.ok) return tooMany(limit.retryAfter);
+
   const admin = await requireAdmin();
   if (!admin) return NextResponse.json({ error: "No autorizado" }, { status: 403 });
 
@@ -35,9 +39,12 @@ export async function PATCH(
 }
 
 export async function DELETE(
-  _request: Request,
+  request: Request,
   { params }: { params: Promise<{ id: string }> },
 ) {
+  const limit = rateLimit(`admin:${clientIp(request)}`, 60, 60_000);
+  if (!limit.ok) return tooMany(limit.retryAfter);
+
   const admin = await requireAdmin();
   if (!admin) return NextResponse.json({ error: "No autorizado" }, { status: 403 });
 

@@ -38,6 +38,8 @@ export const finalizeSchema = z.object({
   home: score,
   away: score,
   advances: z.string().min(1).nullable().optional(),
+  // true = corrección de un partido ya finalizado (recalcula puntos).
+  correction: z.boolean().optional(),
 });
 
 export const tournamentSchema = z.object({

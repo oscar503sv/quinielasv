@@ -16,17 +16,25 @@ export class AdminError extends Error {}
  * Finaliza un partido: setea el resultado oficial, calcula y persiste los
  * puntos de cada pronóstico y marca el partido como `finished`. Registra
  * auditoría. Todo en un batch atómico (Admin SDK, ignora las reglas).
+ *
+ * Con `correction: true` permite re-finalizar un partido YA finalizado para
+ * corregir un marcador mal cargado: el batch es idempotente (reescribe puntos y
+ * resultado) y el ranking se recalcula solo desde `match.result`.
  */
 export async function finalizeMatch(
   matchId: string,
   result: Score,
   performedBy: string,
   advances: string | null = null,
+  correction = false,
 ): Promise<{ predictionsScored: number }> {
   const match = await getMatchById(matchId);
   if (!match) throw new AdminError("El partido no existe.");
-  if (match.status === "finished") {
+  if (match.status === "finished" && !correction) {
     throw new AdminError("El partido ya está finalizado.");
+  }
+  if (match.status !== "finished" && correction) {
+    throw new AdminError("El partido todavía no está finalizado.");
   }
 
   // En eliminatorias el que avanza se deriva del marcador; solo si el resultado
@@ -68,7 +76,7 @@ export async function finalizeMatch(
   await batch.commit();
 
   await writeAuditLog({
-    action: "finalize_match",
+    action: correction ? "correct_match" : "finalize_match",
     entityType: "match",
     entityId: matchId,
     performedBy,

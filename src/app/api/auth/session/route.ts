@@ -5,9 +5,14 @@ import {
   SESSION_COOKIE,
   SESSION_MAX_AGE,
 } from "@/lib/auth/session";
+import { rateLimit, clientIp, tooMany } from "@/lib/rate-limit";
 
 /** Crea la session cookie a partir del idToken del Client SDK. */
 export async function POST(request: Request) {
+  // Anti fuerza-bruta: como máximo 10 intentos de login por IP por minuto.
+  const limit = rateLimit(`session:${clientIp(request)}`, 10, 60_000);
+  if (!limit.ok) return tooMany(limit.retryAfter);
+
   const { idToken } = (await request.json()) as { idToken?: string };
   if (!idToken) {
     return NextResponse.json({ error: "Falta idToken" }, { status: 400 });

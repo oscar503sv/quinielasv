@@ -35,14 +35,28 @@ export async function deleteMatch(id: string) {
   return data as { ok: true; predictionsDeleted: number };
 }
 
-export function finalizeMatch(matchId: string, result: Score, advances: string | null = null) {
+export function finalizeMatch(
+  matchId: string,
+  result: Score,
+  advances: string | null = null,
+  correction = false,
+) {
   return send<{ ok: true; predictionsScored: number }>(
     "/api/admin/finalize-match",
     "POST",
-    { matchId, ...result, advances },
+    { matchId, ...result, advances, correction },
   );
 }
 
 export function updateTournament(patch: Partial<Tournament>) {
   return send<{ ok: true }>("/api/admin/tournament", "PATCH", patch);
+}
+
+export async function deleteUser(uid: string) {
+  const res = await fetch(`/api/admin/users/${uid}`, { method: "DELETE" });
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) {
+    throw new Error((data as { error?: string }).error ?? "Error del servidor");
+  }
+  return data as { ok: true; predictionsDeleted: number };
 }

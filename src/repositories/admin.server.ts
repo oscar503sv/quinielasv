@@ -1,6 +1,6 @@
 import "server-only";
 
-import { getAdminDb } from "@/lib/firebase/admin";
+import { getAdminAuth, getAdminDb } from "@/lib/firebase/admin";
 import type { Match, Prediction, Tournament } from "@/types";
 
 /** Campos editables de un partido (sin id ni result). */
@@ -111,6 +111,34 @@ export async function setChampionPrediction(
     .collection("users")
     .doc(uid)
     .set({ championPrediction: champion }, { merge: true });
+}
+
+/**
+ * Borra por completo a un jugador: sus pronósticos, su doc de perfil y su cuenta
+ * de Auth. La eliminación de la cuenta de Auth es best-effort (puede no existir
+ * si ya fue borrada). Devuelve cuántos pronósticos se eliminaron.
+ */
+export async function deleteUserCascade(
+  uid: string,
+): Promise<{ predictionsDeleted: number }> {
+  const db = getAdminDb();
+  const preds = await db
+    .collection("predictions")
+    .where("userId", "==", uid)
+    .get();
+
+  const batch = db.batch();
+  preds.docs.forEach((d) => batch.delete(d.ref));
+  batch.delete(db.collection("users").doc(uid));
+  await batch.commit();
+
+  try {
+    await getAdminAuth().deleteUser(uid);
+  } catch {
+    // La cuenta de Auth ya no existe: ignorar.
+  }
+
+  return { predictionsDeleted: preds.size };
 }
 
 export interface AuditEntry {

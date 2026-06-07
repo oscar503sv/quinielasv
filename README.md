@@ -31,9 +31,12 @@ Firebase Auth + Firestore (Client + Admin SDK) · TanStack Query · React Hook F
   salen. Crear/unirse/gestionar pasa por `/api/leagues` (Admin SDK).
 - **Cómo se juega** (`/reglas`): explica el puntaje base, los multiplicadores, los bonos
   de campeón y de avance, y los criterios de desempate, con ejemplos.
-- **Panel admin** (`/admin`): partidos (ABM con filtros y paginación), resultados
-  (finalización + cálculo de puntos, incluido quién avanza en eliminatorias), y torneo
-  (iniciar / congelar pronósticos / finalizar / campeón oficial / deadline).
+- **Panel admin** (`/admin`): dashboard con métricas (partidos, jugadores, participación,
+  pendientes de finalizar), partidos (ABM con filtros y paginación), resultados
+  (finalización + cálculo de puntos, incluido quién avanza en eliminatorias, y **corrección
+  de un resultado ya finalizado** con recálculo de puntos), jugadores (ver pronósticos y
+  eliminar cuentas), y torneo (iniciar / congelar pronósticos / finalizar / campeón oficial
+  / deadline). El rol admin es la allowlist `ADMIN_EMAILS` (no un flag por usuario).
 
 ## Puesta en marcha
 
@@ -99,11 +102,16 @@ bonos de campeón y de avance) son puros y se calculan on-the-fly. El marcador s
 los 90'; en eliminatorias, `Match.advances`/`Prediction.advances` y `resolveAdvancer()`
 resuelven quién avanza (ganador del marcador o, si es empate, el desempate por penales).
 
-**Mutaciones sensibles** (finalizar partidos, ABM de partidos, torneo, definir campeón
-del jugador) pasan por route handlers `/api/admin/*` y `/api/champion` con el **Admin
-SDK**; las reglas de Firestore bloquean esas escrituras desde el cliente. El estado del
-torneo (`started` / `predictionsLocked` / `finished` / `champion` / `championLockAt`)
-se lee reactivamente vía `tournament/config` y afecta la UI en vivo.
+**Mutaciones sensibles** (finalizar partidos, ABM de partidos, torneo, eliminar jugadores,
+definir campeón del jugador) pasan por route handlers `/api/admin/*` y `/api/champion` con
+el **Admin SDK**; las reglas de Firestore bloquean esas escrituras desde el cliente. Cada
+handler **re-verifica** la sesión (`requireAdmin()`/`getCurrentUser()`): el gating de
+`src/app/admin/layout.tsx` es solo cosmético, así que manipular el cliente con devtools no
+da acceso. Como defensa en profundidad hay un `src/proxy.ts` (antes "middleware") que
+rechaza `/admin` y `/api/admin` sin cookie de sesión, y un rate limiter en memoria
+(`src/lib/rate-limit.ts`) en login y rutas admin. El estado del torneo (`started` /
+`predictionsLocked` / `finished` / `champion` / `championLockAt`) se lee reactivamente vía
+`tournament/config` y afecta la UI en vivo.
 
 ---
 
