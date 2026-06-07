@@ -82,7 +82,6 @@ export default async function LandingPage() {
               height={14}
               style={{ borderRadius: 3, objectFit: "cover", boxShadow: "0 0 0 1px var(--border)" }}
             />
-            <strong style={{ color: "var(--gold)" }}>2026</strong>
           </span>
         </section>
       </main>
