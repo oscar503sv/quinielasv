@@ -161,7 +161,7 @@ export default function RankingPage() {
                       <span style={{ display: "inline-flex", alignItems: "center", gap: 9 }}>
                         <Flag code={s.support} w={26} h={18} r={4} />
                         <span style={{ fontWeight: 600 }}>{s.name}</span>
-                        {s.me && <Pill tone="gold">tú</Pill>}
+                        {s.me && <Pill tone="gold">vos</Pill>}
                         {s.championBonus && (
                           <Pill tone="gold" title={`Acertó el campeón · +${CHAMPION_BONUS} pts`}>🏆 +{CHAMPION_BONUS}</Pill>
                         )}

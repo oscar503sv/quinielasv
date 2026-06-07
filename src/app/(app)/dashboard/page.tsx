@@ -148,7 +148,7 @@ export default function DashboardPage() {
                 </span>
                 <Flag code={s.support} w={24} h={17} r={4} />
                 <span style={{ fontWeight: 600 }}>{s.name}</span>
-                {s.me && <Pill tone="gold">tú</Pill>}
+                {s.me && <Pill tone="gold">vos</Pill>}
                 {s.championBonus && <span title={`Acertó el campeón · +${CHAMPION_BONUS}`}>🏆</span>}
                 <span className="display tabular" style={{ marginLeft: "auto" }}>{s.pts}</span>
               </div>

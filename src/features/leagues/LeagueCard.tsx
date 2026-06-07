@@ -172,7 +172,7 @@ export function LeagueCard({ league }: { league: League }) {
                 <span style={{ display: "inline-flex", alignItems: "center", gap: 9 }}>
                   <Flag code={s.support} w={24} h={17} r={4} />
                   <span style={{ fontWeight: 600 }}>{s.name}</span>
-                  {s.me && <Pill tone="gold">tú</Pill>}
+                  {s.me && <Pill tone="gold">vos</Pill>}
                   {s.userId === league.ownerUid && <Pill tone="dim">dueño</Pill>}
                 </span>
               </td>
