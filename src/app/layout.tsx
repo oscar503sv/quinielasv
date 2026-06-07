@@ -53,20 +53,13 @@ export const metadata: Metadata = {
     siteName: SITE_NAME,
     title: SITE_NAME,
     description: SITE_DESCRIPTION,
-    images: [
-      {
-        url: "/quinielasv-logo.png",
-        width: 500,
-        height: 500,
-        alt: "Quiniela Mundial 2026",
-      },
-    ],
+    // La imagen 1200×630 la provee la convención app/opengraph-image.tsx.
   },
   twitter: {
-    card: "summary",
+    card: "summary_large_image",
     title: SITE_NAME,
     description: SITE_DESCRIPTION,
-    images: ["/quinielasv-logo.png"],
+    // twitter:image cae al og:image generado por opengraph-image.tsx.
   },
 };
 
