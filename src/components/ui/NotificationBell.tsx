@@ -106,13 +106,8 @@ export function NotificationBell() {
       {open && (
         <div
           role="menu"
-          className="card"
+          className="card notif-dropdown"
           style={{
-            position: "absolute",
-            right: 0,
-            top: "calc(100% + 8px)",
-            width: 320,
-            maxWidth: "calc(100vw - 32px)",
             padding: 6,
             zIndex: 40,
             display: "flex",
