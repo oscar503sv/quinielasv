@@ -4,6 +4,7 @@ import type { ReactNode } from "react";
 import { getCurrentUser } from "@/lib/auth/session";
 import { AuthProvider } from "@/features/auth/AuthProvider";
 import { DataProvider } from "@/features/data/DataProvider";
+import { NotificationsProvider } from "@/features/notifications/NotificationsProvider";
 import { AppShell } from "@/components/ui/AppShell";
 
 // Vistas privadas (tras login): no indexar.
@@ -20,7 +21,9 @@ export default async function AppLayout({ children }: { children: ReactNode }) {
       initialIsAdmin={user.isAdmin}
     >
       <DataProvider>
-        <AppShell>{children}</AppShell>
+        <NotificationsProvider>
+          <AppShell>{children}</AppShell>
+        </NotificationsProvider>
       </DataProvider>
     </AuthProvider>
   );

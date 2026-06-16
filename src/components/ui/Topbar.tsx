@@ -6,6 +6,7 @@ import { usePathname } from "next/navigation";
 import { ThemeToggle } from "./ThemeToggle";
 import { UserMenu } from "./UserMenu";
 import { MobileNav } from "./MobileNav";
+import { NotificationBell } from "./NotificationBell";
 
 const NAV = [
   { href: "/dashboard", label: "Dashboard" },
@@ -69,6 +70,7 @@ export function Topbar() {
 
       <div style={{ marginLeft: "auto", display: "inline-flex", alignItems: "center", gap: 16 }}>
         <ThemeToggle />
+        <NotificationBell />
         <MobileNav nav={NAV} />
         <UserMenu />
       </div>

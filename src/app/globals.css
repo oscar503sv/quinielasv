@@ -468,6 +468,12 @@ a {
   display: none;
 }
 
+/* ---- Tabla de partidos (admin) ---- */
+.admin-match-table th,
+.admin-match-table td {
+  padding: 11px 14px;
+}
+
 /* ---- Avatar ---- */
 .avatar {
   border-radius: 50%;
@@ -582,6 +588,29 @@ a {
   }
   .rank-table .col-abbr {
     display: inline;
+  }
+  /* En móvil cada fila se convierte en una tarjeta apilada. */
+  .admin-match-table thead {
+    display: none;
+  }
+  .admin-match-table tr {
+    display: grid;
+    grid-template-columns: 1fr auto;
+    align-items: center;
+    gap: 8px 12px;
+    padding: 12px 14px;
+  }
+  .admin-match-table td {
+    padding: 0;
+  }
+  .admin-match-table .col-partido {
+    grid-column: 1 / -1;
+  }
+  .admin-match-table .col-partido > span {
+    flex-wrap: wrap;
+  }
+  .admin-match-table .col-actions {
+    justify-self: end;
   }
   .sticky-actions {
     flex-direction: column;
