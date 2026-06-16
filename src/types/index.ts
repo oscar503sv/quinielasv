@@ -112,3 +112,26 @@ export interface SessionUser {
   name: string;
   isAdmin: boolean;
 }
+
+/** Tipos de notificación que producen las Cloud Functions. */
+export type NotificationType =
+  | "reminder30" // faltan ~30 min y no pronosticó
+  | "champion" // recordatorio de elegir campeón/equipo
+  | "points" // puntos sumados al finalizar un partido
+  | "newmatch" // se agregó un nuevo partido
+  | "leader"; // cambió el líder del ranking
+
+/**
+ * Notificación in-app de un usuario. Vive en `users/{uid}/notifications/{id}`.
+ * La crean las Cloud Functions (Admin SDK); el cliente solo la lee y marca `read`.
+ */
+export interface AppNotification {
+  id: string;
+  type: NotificationType;
+  title: string;
+  body: string;
+  /** Ruta interna a la que lleva al tocarla (ej. "/partidos"). null si no aplica. */
+  link: string | null;
+  read: boolean;
+  createdAt: number;
+}
