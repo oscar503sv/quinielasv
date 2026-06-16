@@ -88,7 +88,11 @@ export default function PartidosPage() {
           return true;
       }
     });
-    return groupByDay(visible);
+    const ordered =
+      filter === "finalizados"
+        ? [...visible].sort((a, b) => b.lockAt - a.lockAt)
+        : visible;
+    return groupByDay(ordered);
   }, [matches, filter]);
 
   return (

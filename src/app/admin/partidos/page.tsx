@@ -149,14 +149,15 @@ export default function AdminPartidosPage() {
         <p style={{ color: "var(--text-dim)" }}>No hay partidos con esos filtros.</p>
       ) : (
         <Card style={{ padding: 0, overflow: "hidden" }}>
-          <table style={{ width: "100%", borderCollapse: "collapse" }}>
+          <div style={{ overflowX: "auto" }}>
+          <table className="admin-match-table" style={{ width: "100%", borderCollapse: "collapse" }}>
             <thead>
               <tr style={{ textAlign: "left", color: "var(--text-dim)", fontSize: "0.76rem", textTransform: "uppercase", letterSpacing: "0.06em" }}>
-                <th style={{ padding: "12px 14px" }}>Partido</th>
-                <th style={{ padding: "12px 14px" }}>Fase</th>
-                <th style={{ padding: "12px 14px" }}>Fecha</th>
-                <th style={{ padding: "12px 14px" }}>Estado</th>
-                <th style={{ padding: "12px 14px" }}></th>
+                <th>Partido</th>
+                <th className="col-secondary">Fase</th>
+                <th className="col-secondary">Fecha</th>
+                <th>Estado</th>
+                <th></th>
               </tr>
             </thead>
             <tbody>
@@ -164,7 +165,7 @@ export default function AdminPartidosPage() {
                 const sp = STATUS_PILL[m.status];
                 return (
                   <tr key={m.id} style={{ borderTop: "1px solid var(--border)" }}>
-                    <td style={{ padding: "11px 14px" }}>
+                    <td className="col-partido">
                       <span style={{ display: "inline-flex", alignItems: "center", gap: 8 }}>
                         <Flag code={m.home} w={24} h={17} r={3} />
                         <span style={{ fontWeight: 600 }}>{teamName(m.home)}</span>
@@ -178,14 +179,14 @@ export default function AdminPartidosPage() {
                         )}
                       </span>
                     </td>
-                    <td style={{ padding: "11px 14px", color: "var(--text-dim)", fontSize: "0.86rem" }}>
+                    <td className="col-secondary" style={{ color: "var(--text-dim)", fontSize: "0.86rem" }}>
                       {STAGES[m.stage].label} ·×{STAGES[m.stage].mult}
                     </td>
-                    <td style={{ padding: "11px 14px", color: "var(--text-dim)", fontSize: "0.86rem" }}>{m.date}</td>
-                    <td style={{ padding: "11px 14px" }}>
+                    <td className="col-secondary" style={{ color: "var(--text-dim)", fontSize: "0.86rem" }}>{m.date}</td>
+                    <td className="col-estado">
                       <Pill tone={sp.tone}>{sp.label}</Pill>
                     </td>
-                    <td style={{ padding: "11px 14px", textAlign: "right" }}>
+                    <td className="col-actions" style={{ textAlign: "right" }}>
                       <span style={{ display: "inline-flex", gap: 8, justifyContent: "flex-end" }}>
                         <Button variant="outline" onClick={() => setEditing({ mode: "edit", match: m })}>
                           Editar
@@ -205,6 +206,7 @@ export default function AdminPartidosPage() {
               })}
             </tbody>
           </table>
+          </div>
         </Card>
       )}
 
