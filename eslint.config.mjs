@@ -12,6 +12,8 @@ const eslintConfig = defineConfig([
     "out/**",
     "build/**",
     "next-env.d.ts",
+    // Las Cloud Functions tienen su propio build (tsc); no las lintea la app.
+    "functions/**",
   ]),
 ]);
 

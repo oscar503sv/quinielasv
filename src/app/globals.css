@@ -431,6 +431,15 @@ a {
   background: var(--gold-soft);
 }
 
+/* Dropdown de la campana de notificaciones. */
+.notif-dropdown {
+  position: absolute;
+  right: 0;
+  top: calc(100% + 8px);
+  width: 340px;
+  max-width: calc(100vw - 24px);
+}
+
 /* ---- Barra de acción fija (equipo / campeón) ---- */
 .sticky-actions {
   max-width: 1240px;
@@ -611,6 +620,15 @@ a {
   }
   .admin-match-table .col-actions {
     justify-self: end;
+  }
+  .notif-dropdown {
+    /* En móvil: fijo al viewport, márgenes iguales, sin desbordes. */
+    position: fixed;
+    top: 68px;
+    left: 10px;
+    right: 10px;
+    width: auto;
+    max-width: none;
   }
   .sticky-actions {
     flex-direction: column;
