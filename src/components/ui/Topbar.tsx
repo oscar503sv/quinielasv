@@ -52,7 +52,7 @@ export function Topbar() {
           priority
         />
         <span>Quiniela</span>
-        <span style={{ color: "var(--gold)" }}>2026</span>
+        <span className="logo-year" style={{ color: "var(--gold)" }}>2026</span>
       </Link>
 
       <nav className="topbar-nav">

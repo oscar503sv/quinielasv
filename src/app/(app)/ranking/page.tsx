@@ -129,6 +129,7 @@ export default function RankingPage() {
 
           {/* Tabla */}
           <Card style={{ padding: 0, overflow: "hidden" }}>
+            <div style={{ overflowX: "auto" }}>
             <table className="rank-table" style={{ width: "100%", borderCollapse: "collapse" }}>
               <thead>
                 <tr>
@@ -158,9 +159,9 @@ export default function RankingPage() {
                       {safePage * PER_PAGE + i + 1}
                     </td>
                     <td>
-                      <span style={{ display: "inline-flex", alignItems: "center", gap: 9 }}>
+                      <span style={{ display: "inline-flex", alignItems: "center", gap: 9, minWidth: 0 }}>
                         <Flag code={s.support} w={26} h={18} r={4} />
-                        <span style={{ fontWeight: 600 }}>{s.name}</span>
+                        <span className="rank-name" style={{ fontWeight: 600 }}>{s.name}</span>
                         {s.me && <Pill tone="gold">vos</Pill>}
                         {s.championBonus && (
                           <Pill tone="gold" title={`Acertó el campeón · +${CHAMPION_BONUS} pts`}>🏆 +{CHAMPION_BONUS}</Pill>
@@ -174,6 +175,7 @@ export default function RankingPage() {
                 ))}
               </tbody>
             </table>
+            </div>
           </Card>
 
           <p style={{ color: "var(--text-dim)", fontSize: "0.8rem", margin: 0 }}>

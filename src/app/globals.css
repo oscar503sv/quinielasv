@@ -476,6 +476,11 @@ a {
 .rank-table .col-abbr {
   display: none;
 }
+.rank-name {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
 
 /* ---- Tabla de partidos (admin) ---- */
 .admin-match-table th,
@@ -597,6 +602,12 @@ a {
   }
   .rank-table .col-abbr {
     display: inline;
+  }
+  .rank-name {
+    max-width: 110px;
+  }
+  .logo-year {
+    display: none;
   }
   /* En móvil cada fila se convierte en una tarjeta apilada. */
   .admin-match-table thead {
