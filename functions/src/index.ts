@@ -7,6 +7,7 @@ import {
 } from "firebase-functions/v2/firestore";
 import { logger } from "firebase-functions/v2";
 import { loadTeams, sendNotification } from "./notify";
+import { computeTop, type PredictionLite, type UserLite } from "./standings";
 
 initializeApp();
 const db = getFirestore();
@@ -14,29 +15,42 @@ const db = getFirestore();
 const TZ = "America/El_Salvador";
 const KICKOFF_OFFSET_MS = 5 * 60 * 1000; // kickoff = lockAt + 5 min
 const THREE_DAYS_MS = 3 * 24 * 60 * 60 * 1000;
+const MIN = 60 * 1000;
+const CHAMPION_URGENT_WINDOW_MS = 6 * 60 * 60 * 1000; // 6 h antes del cierre
 
 const teamLabel = (teams: Record<string, string>, home: string, away: string) =>
   `${teams[home] ?? home} vs ${teams[away] ?? away}`;
 
 /**
- * Cada 15 min: a quien NO haya pronosticado un partido cuyo inicio cae en los
- * próximos ~15–35 min, le manda un recordatorio. Id determinista por partido.
+ * Cada 15 min, en una sola pasada, evalúa cada partido `upcoming` contra tres
+ * ventanas independientes según su kickoff (`lockAt + 5min`):
+ *  - 1 h antes  [+50, +70 min] → a quien NO pronosticó (`reminder60`).
+ *  - 30 min antes [+15, +35 min] → a quien NO pronosticó (`reminder30`).
+ *  - al kickoff [0, +20 min] → a quien SÍ pronosticó (`kickoff`).
+ * Los ids deterministas por partido evitan duplicados entre corridas. El solape
+ * parcial de ventanas es inofensivo: las audiencias son disjuntas.
  */
 export const scheduledMatchReminders = onSchedule(
   { schedule: "every 15 minutes", timeZone: TZ },
   async () => {
     const now = Date.now();
-    const windowStart = now + 15 * 60 * 1000;
-    const windowEnd = now + 35 * 60 * 1000;
+    const inWindow = (kickoff: number, fromMin: number, toMin: number) =>
+      kickoff >= now + fromMin * MIN && kickoff <= now + toMin * MIN;
 
     const matchesSnap = await db
       .collection("matches")
       .where("status", "==", "upcoming")
       .get();
-    const due = matchesSnap.docs.filter((d) => {
-      const kickoff = (d.data().lockAt as number) + KICKOFF_OFFSET_MS;
-      return kickoff >= windowStart && kickoff <= windowEnd;
-    });
+    const due = matchesSnap.docs
+      .map((d) => ({ id: d.id, data: d.data() }))
+      .filter((m) => {
+        const kickoff = (m.data.lockAt as number) + KICKOFF_OFFSET_MS;
+        return (
+          inWindow(kickoff, 50, 70) ||
+          inWindow(kickoff, 15, 35) ||
+          inWindow(kickoff, 0, 20)
+        );
+      });
     if (due.length === 0) return;
 
     const [usersSnap, teams] = await Promise.all([
@@ -45,21 +59,47 @@ export const scheduledMatchReminders = onSchedule(
     ]);
 
     for (const m of due) {
-      const md = m.data();
-      const label = teamLabel(teams, md.home, md.away);
+      const kickoff = (m.data.lockAt as number) + KICKOFF_OFFSET_MS;
+      const label = teamLabel(teams, m.data.home, m.data.away);
+
+      // Quiénes ya pronosticaron este partido (una sola query).
+      const predsSnap = await db
+        .collection("predictions")
+        .where("matchId", "==", m.id)
+        .get();
+      const predicted = new Set(
+        predsSnap.docs.map((p) => p.data().userId as string),
+      );
+
       for (const u of usersSnap.docs) {
-        const predSnap = await db
-          .collection("predictions")
-          .doc(`${u.id}_${m.id}`)
-          .get();
-        if (predSnap.exists) continue; // ya pronosticó
-        await sendNotification(u.id, {
-          id: `reminder30_${m.id}`,
-          type: "reminder30",
-          title: "¡Falta poco!",
-          body: `En ~30 min juega ${label} y todavía no pronosticaste.`,
-          link: "/partidos",
-        });
+        const has = predicted.has(u.id);
+        if (!has && inWindow(kickoff, 50, 70)) {
+          await sendNotification(u.id, {
+            id: `reminder60_${m.id}`,
+            type: "reminder60",
+            title: "Falta 1 hora",
+            body: `En ~1 hora juega ${label} y todavía no pronosticaste.`,
+            link: "/partidos",
+          });
+        }
+        if (!has && inWindow(kickoff, 15, 35)) {
+          await sendNotification(u.id, {
+            id: `reminder30_${m.id}`,
+            type: "reminder30",
+            title: "¡Falta poco!",
+            body: `En ~30 min juega ${label} y todavía no pronosticaste.`,
+            link: "/partidos",
+          });
+        }
+        if (has && inWindow(kickoff, 0, 20)) {
+          await sendNotification(u.id, {
+            id: `kickoff_${m.id}`,
+            type: "kickoff",
+            title: "¡Empieza tu partido!",
+            body: `${label} está por comenzar. ¡Seguilo en vivo!`,
+            link: "/partidos",
+          });
+        }
       }
     }
     logger.info(`Recordatorios procesados para ${due.length} partido(s).`);
@@ -107,6 +147,37 @@ export const scheduledChampionReminders = onSchedule(
 );
 
 /**
+ * Cada hora: si el cierre para elegir campeón (`championLockAt`) cae dentro de
+ * las próximas 6 h, manda un aviso urgente a quien aún no eligió campeón. Id
+ * ligado al deadline → un solo aviso por cierre (si el admin lo mueve, reenvía).
+ */
+export const scheduledChampionDeadline = onSchedule(
+  { schedule: "every 60 minutes", timeZone: TZ },
+  async () => {
+    const tSnap = await db.doc("tournament/config").get();
+    const t = tSnap.data() ?? {};
+    if (t.finished === true) return;
+    const lockAt = t.championLockAt as number | null | undefined;
+    if (typeof lockAt !== "number") return;
+
+    const now = Date.now();
+    if (lockAt <= now || lockAt > now + CHAMPION_URGENT_WINDOW_MS) return;
+
+    const usersSnap = await db.collection("users").get();
+    for (const u of usersSnap.docs) {
+      if (u.data().championPrediction) continue; // ya eligió campeón
+      await sendNotification(u.id, {
+        id: `champion_urgent_${lockAt}`,
+        type: "champion",
+        title: "Último llamado para tu campeón",
+        body: "El cierre para elegir campeón es muy pronto. ¡Elegí antes de que cierre!",
+        link: "/campeon",
+      });
+    }
+  },
+);
+
+/**
  * Al finalizar un partido (status → finished), avisa a cada usuario con
  * pronóstico cuántos puntos sumó. Lee `pointsEarned` ya persistido por
  * finalizeMatch (no recalcula). Ignora correcciones (ya estaba finished).
@@ -146,8 +217,59 @@ export const onMatchFinished = onDocumentUpdated(
         link: "/partidos",
       });
     }
+
+    await notifyLeaderChange(matchId);
   },
 );
+
+/**
+ * Tras finalizar un partido, detecta si cambió el 1.º del ranking por su culpa.
+ * Recalcula el top "después" (estado actual) y "antes" (excluyendo este partido)
+ * leyendo `pointsEarned`/`basePoints` ya persistidos. Si cambió y el nuevo líder
+ * tiene puntos, avisa a todos. Id determinista por partido → un solo aviso.
+ */
+async function notifyLeaderChange(matchId: string): Promise<void> {
+  const [usersSnap, predsSnap, tSnap] = await Promise.all([
+    db.collection("users").get(),
+    db.collection("predictions").get(),
+    db.doc("tournament/config").get(),
+  ]);
+
+  const users: UserLite[] = usersSnap.docs.map((u) => ({
+    id: u.id,
+    name: (u.data().name as string) ?? u.id,
+    championPrediction: (u.data().championPrediction as string | null) ?? null,
+  }));
+  const predictions: PredictionLite[] = predsSnap.docs.map((p) => {
+    const d = p.data();
+    return {
+      userId: d.userId as string,
+      matchId: d.matchId as string,
+      pointsEarned: d.pointsEarned as number | undefined,
+      basePoints: d.basePoints as number | undefined,
+    };
+  });
+  const champion = (tSnap.data()?.champion as string | null) ?? null;
+
+  const after = computeTop(users, predictions, champion);
+  const before = computeTop(users, predictions, champion, matchId);
+  if (!after || after.pts <= 0) return;
+  if (before && before.userId === after.userId) return; // no cambió
+
+  for (const u of users) {
+    const body =
+      u.id === after.userId
+        ? "¡Tomaste el primer lugar del ranking! 👑"
+        : `${after.name} tomó el primer lugar del ranking.`;
+    await sendNotification(u.id, {
+      id: `leader_${matchId}`,
+      type: "leader",
+      title: "Nuevo líder 👑",
+      body,
+      link: "/ranking",
+    });
+  }
+}
 
 /**
  * (Extra) Al agregar un partido nuevo con el torneo ya iniciado, avisa a todos.

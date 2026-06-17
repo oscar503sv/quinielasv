@@ -115,7 +115,9 @@ export interface SessionUser {
 
 /** Tipos de notificación que producen las Cloud Functions. */
 export type NotificationType =
+  | "reminder60" // falta ~1 h y no pronosticó
   | "reminder30" // faltan ~30 min y no pronosticó
+  | "kickoff" // su partido (ya pronosticado) está por comenzar
   | "champion" // recordatorio de elegir campeón/equipo
   | "points" // puntos sumados al finalizar un partido
   | "newmatch" // se agregó un nuevo partido

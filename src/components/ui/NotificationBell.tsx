@@ -6,7 +6,9 @@ import { useNotifications } from "@/features/notifications/NotificationsProvider
 import type { AppNotification, NotificationType } from "@/types";
 
 const ICON: Record<NotificationType, string> = {
+  reminder60: "⏳",
   reminder30: "⏰",
+  kickoff: "⚽",
   champion: "🏆",
   points: "🎯",
   newmatch: "🆕",

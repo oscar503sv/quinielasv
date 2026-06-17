@@ -2,7 +2,9 @@ import { getFirestore, FieldValue } from "firebase-admin/firestore";
 import { getMessaging } from "firebase-admin/messaging";
 
 export type NotificationType =
+  | "reminder60"
   | "reminder30"
+  | "kickoff"
   | "champion"
   | "points"
   | "newmatch"
