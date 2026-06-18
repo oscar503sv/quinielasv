@@ -130,7 +130,7 @@ export default function RankingPage() {
           {/* Tabla */}
           <Card style={{ padding: 0, overflow: "hidden" }}>
             <div style={{ overflowX: "auto" }}>
-            <table className="rank-table" style={{ width: "100%", borderCollapse: "collapse" }}>
+            <table className="rank-table rank-table--wide" style={{ width: "100%", borderCollapse: "collapse" }}>
               <thead>
                 <tr>
                   <th>#</th>

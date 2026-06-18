@@ -589,7 +589,7 @@ a {
   .tab {
     text-align: center;
   }
-  .rank-table {
+  .rank-table--wide {
     min-width: 460px;
   }
   .rank-table th,
