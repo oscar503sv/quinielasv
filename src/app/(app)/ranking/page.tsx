@@ -142,7 +142,13 @@ export default function RankingPage() {
                     <span className="col-full">Exactos</span><span className="col-abbr">Exac.</span>
                   </th>
                   <th style={{ textAlign: "right" }}>
+                    <span className="col-full">Dif. exactas</span><span className="col-abbr">Dif.</span>
+                  </th>
+                  <th style={{ textAlign: "right" }}>
                     <span className="col-full">Tendencias</span><span className="col-abbr">Tend.</span>
+                  </th>
+                  <th style={{ textAlign: "right" }}>
+                    <span className="col-full">% acierto</span><span className="col-abbr">%</span>
                   </th>
                 </tr>
               </thead>
@@ -170,7 +176,13 @@ export default function RankingPage() {
                     </td>
                     <td className="display tabular" style={{ textAlign: "right" }}>{s.pts}</td>
                     <td className="tabular" style={{ textAlign: "right" }}>{s.exact}</td>
+                    <td className="tabular" style={{ textAlign: "right" }}>{s.gd}</td>
                     <td className="tabular" style={{ textAlign: "right" }}>{s.trend}</td>
+                    <td className="tabular" style={{ textAlign: "right" }}>
+                      {s.played > 0
+                        ? `${Math.round(((s.played - s.miss) / s.played) * 100)}%`
+                        : "—"}
+                    </td>
                   </tr>
                 ))}
               </tbody>

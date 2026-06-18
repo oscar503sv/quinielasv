@@ -589,6 +589,9 @@ a {
   .tab {
     text-align: center;
   }
+  .rank-table {
+    min-width: 460px;
+  }
   .rank-table th,
   .rank-table td {
     padding: 9px 7px;
